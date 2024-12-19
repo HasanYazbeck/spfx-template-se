@@ -1,7 +1,9 @@
 import * as React from 'react';
 import styles from './Spfx.module.scss';
 import { ISpfxProps } from './ISpfxProps';
+import 'bootstrap/dist/css/bootstrap.min.css'
 
+import { BsAlarm } from "react-icons/bs";
 export interface ISpfxState {
   newItemTitle: string; // State to store the value of the new item input field
   personId: number;
@@ -42,20 +44,49 @@ export default class Spfx extends React.Component < ISpfxProps, ISpfxState > {
     const { items } = this.props;
     return (
       <div className={styles.spfx}>
-        <div className={styles.container}>
+        <div className={`container-fluid`}>
           <div className={styles.row}>
             <div className={styles.column}>
+
+    
+                <div id="carouselExample" className="carousel slide">
+                <div className="carousel-inner">
+                  <div className="carousel-item active">
+                    <img src="..." className="d-block w-100" alt="..."/>
+                  </div>
+                  <div className="carousel-item">
+                    <img src="..." className="d-block w-100" alt="..."/>
+                  </div>
+                  <div className="carousel-item">
+                    <img src="..." className="d-block w-100" alt="..."/>
+                  </div>
+                </div>
+                <button className="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+                  <span className="carousel-control-prev-icon" aria-hidden="true"></span>
+                  <span className="visually-hidden">Previous</span>
+                </button>
+                <button className="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+                  <span className="carousel-control-next-icon" aria-hidden="true"></span>
+                  <span className="visually-hidden">Next</span>
+                </button>
+            </div>
+             
               <h2>SharePoint List CRUD</h2>
+              {/* <BsAlarm size="20px" color="yellow"/> */}
 
               {/* Form to add new item */}
               <input type="text" value={this.state.newItemTitle} onChange={this.handleInputChange} 
               placeholder="Enter new item title" className={styles.inputField} />
 
-              <button onClick={this.handleAddItem} className={styles.addButton}>Add Item</button>
-
-              {/* Button to refresh the list */}
-              <button onClick={this.props.onClick} className={styles.refreshButton}>Refresh List</button>
-
+              <div className={`row`}>
+                <div className={`col-auto`}>
+                  <button onClick={this.handleAddItem} className={`btn btn-primary mr-2`}>Add Item</button>
+                </div>
+                <div className={`col-auto`}>
+                {/* Button to refresh the list */}
+                  <button onClick={this.props.onClick} className={`btn btn-warning`}>Refresh List</button>
+                </div>
+              </div>
             </div>
 
             <div className={styles.column}>

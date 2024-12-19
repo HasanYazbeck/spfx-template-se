@@ -79,6 +79,7 @@ export default class SpfxWebPart extends BaseClientSideWebPart<ISpfxWebPartProps
         onClick: this.getList,
         items:this.state.items,
         onAddItem: this.addItem,
+        context: this.context
       }
     );
 

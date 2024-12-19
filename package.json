@@ -15,8 +15,10 @@
     "@microsoft/sp-webpart-base": "1.5.0",
     "@pnp/sp": "4.7.0",
     "@types/es6-promise": "0.0.33",
+    "bootstrap": "5.3.3",
     "react": "15.6.2",
-    "react-dom": "15.6.2"
+    "react-dom": "15.6.2",
+    "react-icons": "3.11.0"
   },
   "devDependencies": {
     "@microsoft/sp-build-web": "1.5.0",
