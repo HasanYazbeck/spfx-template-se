@@ -3,8 +3,7 @@
 ## Summary
 
 Short summary on functionality and used technologies.
-
-[picture of the solution in action, if possible]
+This is a default template to be used to start developing spfx webparts for sharepoint on prem (subscription edition)
 
 ## Used SharePoint Framework Version
 
