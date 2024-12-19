@@ -38,7 +38,6 @@ export default class Spfx extends React.Component < ISpfxProps, ISpfxState > {
       this.setState({ newItemTitle: '' });
     }
 
-
   public render(): React.ReactElement<ISpfxProps> {
     const { items } = this.props;
     return (
@@ -49,25 +48,14 @@ export default class Spfx extends React.Component < ISpfxProps, ISpfxState > {
               <h2>SharePoint List CRUD</h2>
 
               {/* Form to add new item */}
-              <input 
-                type="text" 
-                value={this.state.newItemTitle} 
-                onChange={this.handleInputChange} 
-                placeholder="Enter new item title" 
-                className={styles.inputField} 
-              />
+              <input type="text" value={this.state.newItemTitle} onChange={this.handleInputChange} 
+              placeholder="Enter new item title" className={styles.inputField} />
 
-          
-
-
-              <button onClick={this.handleAddItem} className={styles.addButton}>
-                Add Item
-              </button>
+              <button onClick={this.handleAddItem} className={styles.addButton}>Add Item</button>
 
               {/* Button to refresh the list */}
-              <button onClick={this.props.onClick} className={styles.refreshButton}>
-                Refresh List
-              </button>
+              <button onClick={this.props.onClick} className={styles.refreshButton}>Refresh List</button>
+
             </div>
 
             <div className={styles.column}>
@@ -80,7 +68,6 @@ export default class Spfx extends React.Component < ISpfxProps, ISpfxState > {
               </ul>
             )}
             </div>
-            
           </div>
         </div>
       </div>
