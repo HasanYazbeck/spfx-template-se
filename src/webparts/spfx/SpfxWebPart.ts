@@ -1,12 +1,7 @@
 import * as React from 'react';
 import * as ReactDom from 'react-dom';
 import { Version } from '@microsoft/sp-core-library';
-import {
-  BaseClientSideWebPart,
-  IPropertyPaneConfiguration,
-  PropertyPaneTextField
-} from '@microsoft/sp-webpart-base';
-
+import { BaseClientSideWebPart, IPropertyPaneConfiguration, PropertyPaneTextField } from '@microsoft/sp-webpart-base';
 import * as strings from 'SpfxWebPartStrings';
 import Spfx from './components/Spfx';
 import { ISpfxProps } from './components/ISpfxProps';
@@ -32,7 +27,7 @@ export default class SpfxWebPart extends BaseClientSideWebPart<ISpfxWebPartProps
       this.spCrudOperations = new SPCrudOperations(
         this.context.spHttpClient,
         this.context.pageContext.web.absoluteUrl,
-        "Test"
+        "Site"
       );
   
       this.spCrudOperations._getItems()
@@ -55,7 +50,7 @@ export default class SpfxWebPart extends BaseClientSideWebPart<ISpfxWebPartProps
       this.spCrudOperations = new SPCrudOperations(
         this.context.spHttpClient,
         this.context.pageContext.web.absoluteUrl,
-        "Test" // Name of the SharePoint list
+        "Site" // Name of the SharePoint list
       );
 
       this.spCrudOperations._insertItem(newItem)
