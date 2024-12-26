@@ -83,12 +83,8 @@ export default class TabsComponent extends React.Component< {}, {} > {
                     Report Content
                 </div>
             </div>
-        );
-    }
+    );
+  }
 
     
 }
-
-document.addEventListener('DOMContentLoaded' , () => {
-    new TabsComponent();
-});
