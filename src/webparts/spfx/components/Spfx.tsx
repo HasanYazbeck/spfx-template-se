@@ -43,7 +43,7 @@ export default class Spfx extends React.Component < ISpfxProps, ISpfxState > {
         <div className={`container-fluid`}>
           <div className={styles.row}>
             <div className={``}>
-                <TabsComponent/>
+                <TabsComponent context={this.props.context}/>
             </div>
           </div>
         </div>

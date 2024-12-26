@@ -1,30 +1,77 @@
 import * as React from 'react';
 import {ISiteInfoProps} from './ISiteInfoProps';
-
+import { SPCrudOperations } from '../../../Classes/SPCrudOperations';
+import { WebPartContext } from '@microsoft/sp-webpart-base';
 export interface ISiteInfoState {
   siteSearched: string;
+  searchResults: ISiteInfoProps[];
+  selectedSite: ISiteInfoProps | null;
 }
 
 export class SiteInfo extends React.Component<{props: ISiteInfoProps , searchOnClick: 
-  React.ReactEventHandler<HTMLInputElement>} , ISiteInfoState> {
-
-    constructor(props: ISiteInfoProps) {
+  React.ReactEventHandler<HTMLInputElement> , context:WebPartContext } , ISiteInfoState> {
+    private spCrudOperations: SPCrudOperations ;
+    private  siteInfoProps: ISiteInfoProps = {
+      SiteName: '',
+      SiteType: '',
+      Latitude: '',
+      Longtitude: '',
+      PowerSource: '',
+      PowerSourceNumber: '',
+      Kadaa: '',
+      IsSecure: false,
+      Priority: 0,
+      NearestArmyCenter: '',
+      NearstArmyCenterNumber: '',
+      Remarks: ''
+    };
+    constructor(props: ISiteInfoProps , context : WebPartContext) {
       super();
       this.state = {
-        siteSearched : ''
+        siteSearched : '',
+        searchResults: [],
+        selectedSite: null,
       };
     }
+
+      // Handle search input change
+  private handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    let siteName: string = event.currentTarget.value;
+    siteName = siteName.replace(/'/g, "''");
+    this.searchSite(siteName);
+    this.setState({ siteSearched: siteName });
+  };
+
+  // Handle site selection
+  private handleSiteSelect = (site: ISiteInfoProps) => {
+    this.setState({ selectedSite: site, searchResults: [], siteSearched: '' });
+  };
+
     public render(): React.ReactElement<{}> {
         return (
             <div className='mt-1'>
                 <div className='input-group input-group-sm mb-3'>
                   <span className='input-group-text' id='inputGroup-sizing-sm'>Search</span>
-                  <input onChange={this.props.searchOnClick}
+                  <input onChange={this.handleSearchChange}
                   type='text'
                   className='form-control'
                   aria-label='Sizing example input'
                   aria-describedby='inputGroup-sizing-sm'/>
                 </div>
+
+                  {/* Search Results List */}
+                  {this.state.searchResults.length > 0 && (
+                    <ul className='list-group mb-3'>
+                      {this.state.searchResults.map((site) => (
+                        <li
+                          key={site.SiteName}
+                          className='list-group-item list-group-item-action'
+                          onClick={() => this.handleSiteSelect(site)}
+                          style={{ cursor: 'pointer' }}
+                        >{site.SiteName}</li>
+                      ))}
+                    </ul>
+                  )}
 
                 <div className='card'>
                     <div className='card-header bg-primary text-white text-center'>
@@ -147,5 +194,45 @@ export class SiteInfo extends React.Component<{props: ISiteInfoProps , searchOnC
                 </div>
             </div>
         );
+    }
+
+    public searchSite = (siteName: string) : void  => {
+      const result: ISiteInfoProps [] = [];
+      try {
+        debugger;
+        const query: string = `?$filter=startswith(SiteName,'${siteName}')` + 
+        `&$select=SiteName,SiteType,Latitude,Longtitude,PowerSourceNumber,IsSecure,` + 
+        `Priority,NearestArmyCenter,NearstArmyCenterNumber,Remarks,Kadaa/Id,Kadaa/Title,` + 
+        `PowerSource/Id,PowerSource/Title&$expand=Kadaa,PowerSource`;
+        this.spCrudOperations = new SPCrudOperations(this.props.context.spHttpClient,
+                                this.props.context.pageContext.web.absoluteUrl,'Site',query);
+        this.spCrudOperations._getItemsWithQuery()
+        .then((data) => {
+          data.map((obj) => {
+            const temp : ISiteInfoProps = {
+              SiteName: obj['SiteName'],
+              SiteType: obj['SiteType'],
+              Latitude: obj['Latitude'],
+              Longtitude : obj['Longtitude'],
+              Priority: obj['Priority'],
+              Remarks: obj['Remarks'],
+              NearestArmyCenter: obj['NearestArmyCenter'],
+              NearstArmyCenterNumber: obj['NearstArmyCenterNumber'],
+              PowerSourceNumber: obj['PowerSourceNumber'],         
+              IsSecure: obj['IsSecure'],
+              Kadaa: obj.Kadaa.Title,
+              PowerSource: obj.PowerSource.Title,
+            };
+            result.push(temp);
+          });
+          this.setState({ searchResults : result });
+          console.log('Item retreived successfully!', data);
+        })
+        .catch(error => {
+          console.error('An error has occurred while retrieving items!', error);
+        });
+      } catch (error) {
+      console.error('An error has occurred!', error);
+      }
     }
 }
