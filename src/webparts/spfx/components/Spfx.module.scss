@@ -2,7 +2,7 @@
 
 .spfx {
   .container {
-    max-width: 700px;
+    max-width: 800px;
     margin: 0px auto;
     box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 25px 50px 0 rgba(0, 0, 0, 0.1);
   }
@@ -10,7 +10,8 @@
   .row {
     @include ms-Grid-row;
     @include ms-fontColor-white;
-    background-color: #9aa9b5;
+    background-color: rgb(13, 110, 253);
+    // background-color: #9aa9b5;
     // background-color: $ms-color-themePrimary;
     padding: 20px;
   }
@@ -121,4 +122,12 @@
   .itemList li:last-child {
     border-bottom: none;
   }
+}
+
+.tabContentBg{
+  background-color: rgb(13, 110, 253);
+}
+
+.navLinkBg{
+  background-color: rgb(13, 110, 253) !important;
 }

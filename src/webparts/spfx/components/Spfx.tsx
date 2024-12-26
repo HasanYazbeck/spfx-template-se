@@ -1,9 +1,8 @@
 import * as React from 'react';
 import styles from './Spfx.module.scss';
 import { ISpfxProps } from './ISpfxProps';
-import 'bootstrap/dist/css/bootstrap.min.css'
-
-import { BsAlarm } from "react-icons/bs";
+import 'bootstrap/dist/css/bootstrap.min.css';
+// import { BsAlarm } from "react-icons/bs";
 import TabsComponent from './TabsComponent';
 
 export interface ISpfxState {
@@ -30,29 +29,22 @@ export default class Spfx extends React.Component < ISpfxProps, ISpfxState > {
         alert('Please enter a valid title for the item.');
         return;
       }
-  
-      const newItem = {
-        Title: this.state.newItemTitle // Assuming 'Title' is the name of the column in SharePoint
-      };
-  
+      const newItem = {Title: this.state.newItemTitle}; // Assuming 'Title' is the name of the column in SharePoint
       // Call the parent method to add the item
       this.props.onAddItem(newItem);
-  
       // Clear the input field after submission
       this.setState({ newItemTitle: '' });
     }
 
   public render(): React.ReactElement<ISpfxProps> {
-    const { items } = this.props;
+    // const { items } = this.props;
     return (
       <div className={styles.spfx}>
         <div className={`container-fluid`}>
           <div className={styles.row}>
-            <div className={styles.column}>
-
+            <div className={``}>
                 <TabsComponent/>
-                </div>
-
+            </div>
           </div>
         </div>
       </div>

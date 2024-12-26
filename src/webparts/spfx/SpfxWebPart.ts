@@ -1,11 +1,10 @@
 import * as React from 'react';
 import * as ReactDom from 'react-dom';
-import { Version } from '@microsoft/sp-core-library';
 import { BaseClientSideWebPart, IPropertyPaneConfiguration, PropertyPaneTextField } from '@microsoft/sp-webpart-base';
 import * as strings from 'SpfxWebPartStrings';
 import Spfx from './components/Spfx';
 import { ISpfxProps } from './components/ISpfxProps';
-import { SPCrudOperations } from "../Classes/SPCrudOperations";
+import { SPCrudOperations } from '../Classes/SPCrudOperations';
 import { ISPItem } from '../Interfaces/ISPItem';
 
 export interface ISpfxWebPartProps {
@@ -15,8 +14,7 @@ export interface ISpfxWebPartState {
   items: any[]; // Update the type based on your list data structure
 }
 export default class SpfxWebPart extends BaseClientSideWebPart<ISpfxWebPartProps> {
-  private spCrudOperations : SPCrudOperations;
-  
+  private spCrudOperations: SPCrudOperations;
   private state: ISpfxWebPartState = {
     items: [] // Initial state for items
   };
@@ -27,15 +25,15 @@ export default class SpfxWebPart extends BaseClientSideWebPart<ISpfxWebPartProps
       this.spCrudOperations = new SPCrudOperations(
         this.context.spHttpClient,
         this.context.pageContext.web.absoluteUrl,
-        "Site"
+        'Site'
       );
-  
+
       this.spCrudOperations._getItems()
         .then(results => {
           console.log('Results:', results);
-          this.setState({ items: results });
+          this.setState({items: results });
           this.state.items = results; // Update state with results
-          this.render(); 
+          this.render();
         })
         .catch(error => {
           console.error('An Error has Occurred!', error);
@@ -50,7 +48,7 @@ export default class SpfxWebPart extends BaseClientSideWebPart<ISpfxWebPartProps
       this.spCrudOperations = new SPCrudOperations(
         this.context.spHttpClient,
         this.context.pageContext.web.absoluteUrl,
-        "Site" // Name of the SharePoint list
+        'Site' // Name of the SharePoint list
       );
 
       this.spCrudOperations._insertItem(newItem)
@@ -65,14 +63,14 @@ export default class SpfxWebPart extends BaseClientSideWebPart<ISpfxWebPartProps
       console.error('An error has occurred!', error);
     }
   }
-  
+
   public render(): void {
     const element: React.ReactElement<ISpfxProps > = React.createElement(
       Spfx,
       {
         description: this.properties.description,
         onClick: this.getList,
-        items:this.state.items,
+        items: this.state.items,
         onAddItem: this.addItem,
         context: this.context
       }

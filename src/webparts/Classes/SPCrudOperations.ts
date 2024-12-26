@@ -1,68 +1,67 @@
 import {
     SPHttpClient,
     SPHttpClientResponse,
-    ISPHttpClientOptions,
-  } from "@microsoft/sp-http";
-import { ISPItem } from "../Interfaces/ISPItem";
-import { IUser} from "../Interfaces/IUser";
-import { FieldTypeKind } from "../Enums/enums"
+    ISPHttpClientOptions
+  } from '@microsoft/sp-http';
+import { ISPItem } from '../Interfaces/ISPItem';
+import { IUser} from '../Interfaces/IUser';
+import { FieldTypeKind } from '../Enums/enums';
 
 
   export class SPCrudOperations {
     private listName: string;
     private siteUrl: string;
     private spHttpClient: SPHttpClient;
+    private query?: string;
 
-  constructor(spHttpClient: SPHttpClient, siteUrl: string, listName: string){
+  constructor(spHttpClient: SPHttpClient, siteUrl: string, listName: string, query?: string) {
         this.spHttpClient = spHttpClient;
         this.siteUrl = siteUrl;
         this.listName = listName;
+        this.query = query;
   }
 
   // Create List
-  public async _createList(listName:string , listDescription: string ): Promise<void> {
+  public async _createList(listName: string , listDescription: string): Promise<void> {
 
     const listUrl: string =  `${this.siteUrl}/_api/web/lists/GetByTitle('${this.listName}')`;
     try {
         await this.spHttpClient.get(listUrl, SPHttpClient.configurations.v1)
           .then((response: SPHttpClientResponse) => {
             if (response.status === 200) {
-              alert("A List already exists with this name.");
+              alert('A List already exists with this name.');
               return;
             }
             if (response.status === 404) {
               const url: string = `${this.siteUrl}/_api/web/lists`;
               const listDefinition: any = {
-                "Title": listName,
-                "Description": listDescription,
-                "AllowContentTypes": true,
-                "BaseTemplate": 100,
-                "ContentTypesEnabled": true,
+                'Title': listName,
+                'Description': listDescription,
+                'AllowContentTypes': true,
+                'BaseTemplate': 100,
+                'ContentTypesEnabled': true,
               };
     
-              const spHttpClientOptions: ISPHttpClientOptions = {
-                "body": JSON.stringify(listDefinition),
-              };
-              
+              const spHttpClientOptions: ISPHttpClientOptions = {'body': JSON.stringify(listDefinition)};
               this.spHttpClient.post(url, SPHttpClient.configurations.v1, spHttpClientOptions)
                 .then((response: SPHttpClientResponse) => {
                   if (response.status === 201) {
-                    alert("A new List has been created successfully.");
+                    alert('A new List has been created successfully.');
                   } else {
                     response.json().then((responseJson: JSON) => {
-                      alert("Error Message" + response.status + " - " + JSON.stringify(responseJson));
+                      alert('Error Message' + response.status + ' - ' + JSON.stringify(responseJson));
                     });  
                   }
                 });
             } else {
               response.json().then((responseJson: JSON) => {
-                      alert("Error Message" + response.status + " - " + JSON.stringify(responseJson));
+                      alert('Error Message' + response.status + ' - ' + JSON.stringify(responseJson));
                     });
             }
           });
     }
-    catch(error){
-        console.error("Error creating item:", error);
+    catch (error ) {
+        console.error('Error creating item:', error);
         throw error;
     }
   }
@@ -83,13 +82,13 @@ import { FieldTypeKind } from "../Enums/enums"
     try {
       const response = await this.spHttpClient.post(url, SPHttpClient.configurations.v1, spHttpClientOptions);
       if (response.status === 201) {
-        alert("Column added successfully.");
+        alert('Column added successfully.');
       } else {
         const responseJson = await response.json();
-        alert("Error adding column: " + JSON.stringify(responseJson));
+        alert('Error adding column: ' + JSON.stringify(responseJson));
       }
     } catch (error) {
-      console.error("Error adding column:", error);
+      console.error('Error adding column:', error);
       throw error;
     }
   }
@@ -106,90 +105,115 @@ import { FieldTypeKind } from "../Enums/enums"
         }
       });
       if (response.status === 204) {
-        alert("Column deleted successfully.");
+        alert('Column deleted successfully.');
       } else {
         const responseJson = await response.json();
-        alert("Error deleting column: " + JSON.stringify(responseJson));
+        alert('Error deleting column: ' + JSON.stringify(responseJson));
       }
     } catch (error) {
-      console.error("Error deleting column:", error);
+      console.error('Error deleting column:', error);
       throw error;
     }
   }
 
-  //Insert item List
-  public async _insertItem(item : ISPItem ): Promise<void> {
-        const url : string = `${this.siteUrl}/_api/web/lists/getByTitle('${this.listName}')/items`;
-        const spHttpClientOptions : ISPHttpClientOptions = {
+  // Insert item List
+  public async _insertItem(item: ISPItem): Promise<void> {
+        const url: string = `${this.siteUrl}/_api/web/lists/getByTitle('${this.listName}')/items`;
+        const spHttpClientOptions: ISPHttpClientOptions = {
                 body: JSON.stringify(item)
                 };
 
         try {
-          const response: SPHttpClientResponse = await this.spHttpClient.post(url, SPHttpClient.configurations.v1, spHttpClientOptions);
+          const response: SPHttpClientResponse = await this.spHttpClient.post(url, SPHttpClient.configurations.v1,
+            spHttpClientOptions);
 
-            if (response.status === 201) //the item is created for response code 201
-              {
-                alert("A new Item inserted successfully.");
+            if (response.status === 201) { // the item is created for response code 201
+                alert('A new Item inserted successfully.');
           } else {
               const responseJson = await response.json();
-              alert("Error Message : " + response.status + " - " + JSON.stringify(responseJson));
+              alert('Error Message: ' + response.status + ' - ' + JSON.stringify(responseJson));
           }
         }
-        catch(error){
-            console.error("Error creating item:", error);
+        catch (error){
+            console.error('Error creating item:', error);
             throw error;
         }
         
   }
-      
-  //Get Items List
+
+  // Get Items List
   public async _getItems(): Promise<any[]> {
-    const url : string = `${this.siteUrl}/_api/web/lists/getbytitle('${this.listName}')/items`;
+    const url: string = `${this.siteUrl}/_api/web/lists/getbytitle('${this.listName}')/items`;
    
-    try{
+    try {
         const response = await this.spHttpClient.get(url, SPHttpClient.configurations.v1);
         if (response.status === 200) {
-            const responseData : any = await response.json();
+            const responseData: any = await response.json();
             // console.log('Items retrieved successfully:', responseData);
             return responseData['value'];  
             } else {
-                const responseError : any = await response.json();
+                const responseError: any = await response.json();
                 console.log(`Error retrieving items. Status: ${responseError.status}`, responseError);
-                alert("Error Message" +  JSON.stringify(responseError));
+                alert('Error Message' +  JSON.stringify(responseError));
                 throw new Error(`Error retrieving items. Status: ${responseError.status}`);
               }
     }
-    catch(error){
-        console.error("Error Retreiving Items", error);
+    catch (error ) {
+        console.error('Error Retreiving Items', error);
         throw error;
     }
   }
 
-  //Get Item List By Id or Title
-  public async _getItemById(id:string) : Promise<ISPItem>{
+   // Get Items List
+   public async _getItemsWithQuery(): Promise<any[]> {
+    const url: string = `${this.siteUrl}/_api/web/lists/getbytitle('${this.listName}')/items/${this.query}`;
+
+    try {
+      const response = await this.spHttpClient.get(
+        url,
+        SPHttpClient.configurations.v1
+      );
+      if (response.status === 200) {
+        const responseData: any = await response.json();
+        // console.log('Items retrieved successfully:', responseData.value);
+        return responseData.value;
+      } else {
+        const responseError: any = await response.json();
+        console.log(`Error retrieving items. Status: ${responseError.status}`, responseError);
+        // alert('Error Message' + JSON.stringify(responseError));
+        throw new Error(`Error retrieving items. Status: ${responseError.status}`
+        );
+      }
+    } catch (error) {
+      console.error('Error Retreiving Items', error);
+      throw error;
+    }
+  }
+
+  // Get Item List By Id or Title
+  public async _getItemById(id: string): Promise<ISPItem>{
     const url: string = `${this.siteUrl}/_api/web/lists/getbytitle(${this.listName})/items?filter=Id eq ${id}`;
 
     try{
-      return this.spHttpClient.get(url,SPHttpClient.configurations.v1)
+      return this.spHttpClient.get(url, SPHttpClient.configurations.v1)
       .then((response: SPHttpClientResponse) => {
         return response.json();
       })
       .then((itemsList: any) => {
         const tempItem: any = itemsList.value[0];
-        const listItem: ISPItem = tempItem as ISPItem //Cast as interface ISPItem
+        const listItem: ISPItem = tempItem as ISPItem; // Cast as interface ISPItem
         return listItem;
       }) as Promise<ISPItem>;
     }
     catch(error){
-      console.error("Error Retreiving Item", error);
+      console.error('Error Retreiving Item', error);
       throw error;
     }
 
   }
   
-  //Update Item 
-  public async _updateItem(itemId:string, item : ISPItem) : Promise<SPHttpClientResponse>{
-
+  // Update Item 
+  public async _updateItem(itemId: string , item: ISPItem): Promise<SPHttpClientResponse>{
     const url: string = `${this.siteUrl}/_api/web/lists/getbytitle('${this.listName}')/items(${itemId})`;
     const spHttpClientOptions: ISPHttpClientOptions = {
       headers: {
@@ -199,7 +223,8 @@ import { FieldTypeKind } from "../Enums/enums"
       body: JSON.stringify(item)
     };
     try {
-      const response: SPHttpClientResponse = await this.spHttpClient.post(url, SPHttpClient.configurations.v1, spHttpClientOptions);
+      const response: SPHttpClientResponse = await this.spHttpClient.post(url,
+        SPHttpClient.configurations.v1, spHttpClientOptions);
         if (response.ok) {
           console.log('Item updated successfully');
           return response;
@@ -215,7 +240,7 @@ import { FieldTypeKind } from "../Enums/enums"
       }
   }
 
-  //Delete Item
+  // Delete Item
   public async _deleteItem(itemId: number): Promise<void> {
     const url: string = `${this.siteUrl}/_api/web/lists/getbytitle('${this.listName}')/items(${itemId})`;
     const spHttpClientOptions: ISPHttpClientOptions = {
@@ -226,7 +251,8 @@ import { FieldTypeKind } from "../Enums/enums"
     };
 
     try {
-      const response: SPHttpClientResponse = await this.spHttpClient.post(url, SPHttpClient.configurations.v1, spHttpClientOptions);
+      const response: SPHttpClientResponse = await this.spHttpClient.post(url,
+        SPHttpClient.configurations.v1, spHttpClientOptions);
       if (response.ok) {
         console.log('Item deleted successfully');
       } else {
@@ -241,11 +267,11 @@ import { FieldTypeKind } from "../Enums/enums"
   }
 
   // Get User by name or email
-  public async _searchUsers(query:string) : Promise<IUser> {
+  public async _searchUsers(query: string): Promise<IUser> {
       const url: string = `${this.siteUrl}/_api/web/siteusers?$filter=substringof('${query}',Title) or substringof('${query}',Email)`;
-  
+
       try{
-        return this.spHttpClient.get(url,SPHttpClient.configurations.v1)
+        return this.spHttpClient.get(url, SPHttpClient.configurations.v1)
         .then((response: SPHttpClientResponse) => {
           return response.json();
         })
@@ -258,16 +284,14 @@ import { FieldTypeKind } from "../Enums/enums"
             Email: user.Email,
             LoginName: user.LoginName
           }));
-   
-          const listItem: IUser = users  //Cast as interface ISPItem
+
+          const listItem: IUser = users;  // Cast as interface ISPItem
           return listItem;
         }) as Promise<IUser>;
       }
-      catch(error){
-        console.error("Error Retreiving Item", error);
+      catch (error){
+        console.error('Error Retreiving Item', error);
         throw error;
       }
-  
   }
-
 }
