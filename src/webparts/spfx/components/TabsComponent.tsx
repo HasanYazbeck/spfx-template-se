@@ -5,12 +5,13 @@ import { SiteInfo } from './SiteInfo/SiteInfo';
 import {ISiteInfoProps} from '../components/SiteInfo/ISiteInfoProps';
 import { SPCrudOperations } from '../../Classes/SPCrudOperations';
 import { WebPartContext } from '@microsoft/sp-webpart-base';
+
 export interface ITabsComponentState {
   activeTab: string; // To keep track of the currently active tab
 }
 
 export default class TabsComponent extends React.Component<{}, ITabsComponentState> {
-  private spCrudOperations: SPCrudOperations;
+  private spCrudOperations: SPCrudOperations ;
   private  siteInfoProps: ISiteInfoProps = {
     SiteName: '',
     SiteType: '',
@@ -43,32 +44,22 @@ export default class TabsComponent extends React.Component<{}, ITabsComponentSta
   private _getSitesInfo = (context: WebPartContext): ISiteInfoProps => {
     return this.siteInfoProps;
   }
-  /**
-   * Renders the component
-   */
+
   public render(): React.ReactElement<{}> {
      const { activeTab } = this.state;
 
     const searchSites: React.ReactEventHandler<HTMLInputElement> = (event) => {
+      debugger;
       let siteName: string = event.currentTarget.value;
       siteName = siteName.replace(/'/g, "''");
       console.log(event.currentTarget.value);
-        try {
-          debugger;
-          const query: string = `?$filter=startswith(SiteName,'${siteName}')&$select=SiteName,SiteType,Latitude,Longtitude,PowerSourceNumber,IsSecure,Priority,NearestArmyCenter,NearestArmyCenterNumber,Remarks,Kadaa/Id,Kadaa/Title&$expand=Kadaa`;
-          // this.spCrudOperations = new SPCrudOperations(this.props.context.spHttpClient,
-          //                         this.props.context.pageContext.web.absoluteUrl,'Site',query);
-          this.spCrudOperations._getItemsWithQuery()
-          .then((data) => {
-            console.log('Item retreived successfully!', data);
-          })
-          .catch(error => {
-            console.error('An error has occurred while retrieving items!', error);
-          });
-        } catch (error) {
-        console.error('An error has occurred!', error);
+      try{
+        this.searchSite(siteName);
+      } catch (error ){
+        console.log(error);
       }
     };
+    
     return (
       <div>
         <ul className={`nav nav-tabs`} id='nav-bar-tab' role='tablist'>
@@ -117,5 +108,32 @@ export default class TabsComponent extends React.Component<{}, ITabsComponentSta
         </div>
       </div>
     );
+  }
+
+  public searchSite = (siteName: string) : ISiteInfoProps []  => {
+    const result: ISiteInfoProps [] = [];
+    try {
+      debugger;
+      const query: string = `?$filter=startswith(SiteName,'${siteName}')&$select=SiteName,SiteType,Latitude,Longtitude,PowerSourceNumber,IsSecure,Priority,NearestArmyCenter,NearstArmyCenterNumber,Remarks,Kadaa/Id,Kadaa/Title&$expand=Kadaa`;
+      this.spCrudOperations = new SPCrudOperations(this.context.spHttpClient,
+                              this.context.pageContext.web.absoluteUrl,'Site',query);
+      this.spCrudOperations._getItemsWithQuery()
+      .then((data) => {
+        data.map((obj) => {
+          const temp : ISiteInfoProps = {
+            SiteName: obj['SiteName'],
+            SiteType: obj['SiteType'],
+          };
+          result.push(temp);
+        });
+        console.log('Item retreived successfully!', data);
+      })
+      .catch(error => {
+        console.error('An error has occurred while retrieving items!', error);
+      });
+    } catch (error) {
+    console.error('An error has occurred!', error);
+    }
+    return result;
   }
 }
