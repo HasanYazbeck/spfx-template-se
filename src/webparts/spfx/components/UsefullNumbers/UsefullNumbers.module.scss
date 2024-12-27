@@ -1,0 +1,195 @@
+@import '~@microsoft/sp-office-ui-fabric-core/dist/sass/SPFabricCore.scss';
+
+.directoryContainer {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+  }
+  
+  h1 {
+    font-size: 24px;
+    margin-bottom: 15px;
+    text-align: center;
+  }
+  
+  .searchBar {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .categorySection {
+    margin-bottom: 20px;
+  }
+  
+  .categorySection h2 {
+    font-size: 20px;
+    border-bottom: 2px solid #0078d4;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+  }
+  
+  .numberEntry {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .numberEntry a {
+    color: #0078d4;
+    text-decoration: none;
+  }
+  
+  .numberEntry a:hover {
+    text-decoration: underline;
+  }
+  
+  .entryName {
+    font-weight: bold;
+  }
+  
+  .entryNumber {
+    font-size: 14px;
+  }
+  
+  @media (max-width: 600px) {
+    .numberEntry {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  
+    .entryNumber {
+      margin-top: 5px;
+    }
+  }
+  
+  .profileContainer {
+    // width: 300px;
+    margin: 20px auto;
+    font-family: Arial, sans-serif;
+    background-color: #f4f9fd;
+    border: 1px solid #c0d3eb;
+    border-radius: 8px;
+    overflow: hidden;
+    color: #333;
+  }
+  
+  .profileHeader {
+    background-color: #0d6efd;
+    text-align: center;
+    padding: 20px 10px;
+    color: white;
+  }
+  
+  .profileAvatar img {
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+  }
+  
+  .profileStats {
+    display: flex;
+    justify-content: space-around;
+    background-color: #e6f4ff;
+    padding: 10px 0;
+    border-top: 1px solid #c0d3eb;
+    border-bottom: 1px solid #c0d3eb;
+  }
+  
+  .profileStats div {
+    text-align: center;
+  }
+  
+  .profileStats span {
+    font-size: 18px;
+    font-weight: bold;
+    display: block;
+  }
+  
+  .postBox {
+    padding: 10px;
+    background-color: #f4f9fd;
+  }
+  
+  .postBox textarea {
+    width: 100%;
+    height: 60px;
+    padding: 10px;
+    border: 1px solid #c0d3eb;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    font-size: 14px;
+  }
+  
+  .postBox button {
+    width: 100%;
+    background-color: #0d6efd;
+    color: white;
+    border: none;
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .postBox button:hover {
+    background-color: #0d6efd;
+  }
+  
+  .post {
+    padding: 10px;
+    font-size: 14px;
+    background-color: #ffffff;
+    border-top: 1px solid #c0d3eb;
+  }
+  
+
+  .itemDetails {
+    // max-width: 400px;
+    margin: 20px auto;
+    font-family: 'Segoe UI Web (West European)';
+  }
+  
+  .formGroup {
+    margin-bottom: 15px;
+  }
+  
+  label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333;
+  }
+  
+  input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+    font-size: 14px;
+    color: #333;
+  }
+  
+  input[readonly] {
+    background-color: #e9ecef; /* Slightly different background for readonly fields */
+    cursor: not-allowed;
+  }
+
+  .formLabel {
+    flex: 0 0 100px; /* Set a fixed width for the labels */
+    text-align: right; /* Align text to the right */
+    margin-right: 10px; /* Add spacing between label and input */
+    color: white;
+    font-size: medium;
+  }
+  
+  .formControl {
+    flex: 1; /* Let the input take the remaining space */
+    padding: 8px; /* Add padding for a better appearance */
+    border: 1px solid #ccc; /* Add a subtle border */
+    border-radius: 5px; /* Optional: Rounded corners */
+  }

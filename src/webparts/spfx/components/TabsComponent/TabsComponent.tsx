@@ -1,18 +1,25 @@
 import * as React from 'react';
-import styles from './Spfx.module.scss';
+
+// Styles
+import styles from '../Spfx.module.scss';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { SiteInfo } from './SiteInfo/SiteInfo';
-import {ISiteInfoProps} from '../components/SiteInfo/ISiteInfoProps';
-import { SPCrudOperations } from '../../Classes/SPCrudOperations';
-import { WebPartContext } from '@microsoft/sp-webpart-base';
 
-export interface ITabsComponentState {
-  activeTab: string; // To keep track of the currently active tab
-}
+// Interfaces
+import {site} from '../SiteInfo/ISiteInfoProps';
+import {PhoneNumber} from '../UsefullNumbers/IUsefulNumbers';
+import {ITabsComponentProps , ITabsComponentState} from './ITabsComponent';
 
-export default class TabsComponent extends React.Component<{context: WebPartContext}, ITabsComponentState> {
-  private spCrudOperations: SPCrudOperations ;
-  private  siteInfoProps: ISiteInfoProps = {
+// Classess
+import { SPCrudOperations } from '../../../Classes/SPCrudOperations';
+
+// Components
+import { SiteInfo } from '../SiteInfo/SiteInfo';
+import {UsefullNumbersDirectory} from '../UsefullNumbers/UsefulNumbersDirectory';
+
+export default class TabsComponent extends React.Component<ITabsComponentProps, ITabsComponentState> {
+  private  siteInfoProps: site = {
+    Id: 0,
+    Title: '',
     SiteName: '',
     SiteType: '',
     Latitude: '',
@@ -24,14 +31,20 @@ export default class TabsComponent extends React.Component<{context: WebPartCont
     Priority: 0,
     NearestArmyCenter: '',
     NearstArmyCenterNumber: '',
-    Remarks: ''
+    Remarks: '',
   };
-  constructor(props) {
+  private usefullNumber : PhoneNumber = {
+    Title: '',
+    Number: '',
+    Category: '',
+    Region: ''
+  };
+  constructor(props: ITabsComponentProps) {
     super();
     this.state = {
       activeTab: 'site-tab' // Default active tab
     };
-  }
+  };
 
   /**
    * Handles tab change when a user clicks on a tab
@@ -44,17 +57,6 @@ export default class TabsComponent extends React.Component<{context: WebPartCont
   public render(): React.ReactElement<{}> {
      const { activeTab } = this.state;
 
-    const searchSites: React.ReactEventHandler<HTMLInputElement> = (event) => {
-      let siteName: string = event.currentTarget.value;
-      siteName = siteName.replace(/'/g, "''");
-      console.log(event.currentTarget.value);
-      try{
-        // this.searchSite(siteName);
-      } catch (error ){
-        console.log(error);
-      }
-    };
-    
     return (
       <div>
         <ul className={`nav nav-tabs`} id='nav-bar-tab' role='tablist'>
@@ -86,7 +88,7 @@ export default class TabsComponent extends React.Component<{context: WebPartCont
           <div className={`tab-pane fade fw-medium ${activeTab === 'site-tab' ? 'show active' : ''}`}
           id='site-tab-pane'
           role='tabpanel'>
-            <SiteInfo props={this.siteInfoProps} searchOnClick={searchSites} context={this.props.context}/>
+            <SiteInfo siteInfo={this.siteInfoProps} context={this.props.context}/>
           </div>
           <div className={`tab-pane fade ${activeTab === 'problems-tab' ? 'show active' : ''}`}
           id='problems-tab-pane' role='tabpanel'>
@@ -94,7 +96,7 @@ export default class TabsComponent extends React.Component<{context: WebPartCont
           </div>
           <div className={`tab-pane fade ${activeTab === 'userfulNumbers-tab' ? 'show active' : ''}`}
           id='userfulNumbers-tab-pane' role='tabpanel'>
-            Useful Numbers Content
+           <UsefullNumbersDirectory usefullNumber={this.usefullNumber} context={this.props.context}/>
           </div>
           <div className={`tab-pane fade ${activeTab === 'report-tab' ? 'show active' : ''}`}
           id='report-tab-pane' role='tabpanel'>

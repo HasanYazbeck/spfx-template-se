@@ -1,34 +1,32 @@
 import * as React from 'react';
-import {ISiteInfoProps} from './ISiteInfoProps';
+import {site, ISiteInfoProps , ISiteInfoState } from './ISiteInfoProps';
 import { SPCrudOperations } from '../../../Classes/SPCrudOperations';
 import { WebPartContext } from '@microsoft/sp-webpart-base';
-export interface ISiteInfoState {
-  siteSearched: string;
-  searchResults: ISiteInfoProps[];
-  selectedSite: ISiteInfoProps | null;
-}
+import { SearchBar } from '../SearchBarComponent/SearchBar';
 
-export class SiteInfo extends React.Component<{props: ISiteInfoProps , searchOnClick: 
-  React.ReactEventHandler<HTMLInputElement> , context:WebPartContext } , ISiteInfoState> {
+
+export class SiteInfo extends React.Component<ISiteInfoProps, ISiteInfoState> {
     private spCrudOperations: SPCrudOperations ;
-    private  siteInfoProps: ISiteInfoProps = {
-      SiteName: '',
-      SiteType: '',
-      Latitude: '',
-      Longtitude: '',
-      PowerSource: '',
-      PowerSourceNumber: '',
-      Kadaa: '',
-      IsSecure: false,
-      Priority: 0,
-      NearestArmyCenter: '',
-      NearstArmyCenterNumber: '',
-      Remarks: ''
-    };
-    constructor(props: ISiteInfoProps , context : WebPartContext) {
+
+    // private  siteInfoProps: site = {
+    //   Title: '',
+    //   SiteName: '',
+    //   SiteType: '',
+    //   Latitude: '',
+    //   Longtitude: '',
+    //   PowerSource: '',
+    //   PowerSourceNumber: '',
+    //   Kadaa: '',
+    //   IsSecure: false,
+    //   Priority: 0,
+    //   NearestArmyCenter: '',
+    //   NearstArmyCenterNumber: '',
+    //   Remarks: '',
+    //   Id: 0
+    // };
+    constructor(props: ISiteInfoProps) {
       super();
       this.state = {
-        siteSearched : '',
         searchResults: [],
         selectedSite: null,
       };
@@ -38,44 +36,30 @@ export class SiteInfo extends React.Component<{props: ISiteInfoProps , searchOnC
   private handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     let siteName: string = event.currentTarget.value;
     siteName = siteName.replace(/'/g, "''");
-    this.searchSite(siteName);
-    this.setState({ siteSearched: siteName });
+    if (siteName === ''){
+      this.setState({ selectedSite: null, searchResults: []});
+    } else {
+      this.searchSite(siteName);
+    }
   };
 
   // Handle site selection
-  private handleSiteSelect = (site: ISiteInfoProps) => {
-    this.setState({ selectedSite: site, searchResults: [], siteSearched: '' });
+  private   handleSiteSelect = (site: site) => {
+    if (site.Id !== 0){
+      this.setState({ selectedSite: site, searchResults: []});
+    } else {
+      this.setState({ selectedSite: null, searchResults: []});
+    }
   };
 
     public render(): React.ReactElement<{}> {
         return (
-            <div className='mt-1'>
-                <div className='input-group input-group-sm mb-3'>
-                  <span className='input-group-text' id='inputGroup-sizing-sm'>Search</span>
-                  <input onChange={this.handleSearchChange}
-                  type='text'
-                  className='form-control'
-                  aria-label='Sizing example input'
-                  aria-describedby='inputGroup-sizing-sm'/>
-                </div>
-
-                  {/* Search Results List */}
-                  {this.state.searchResults.length > 0 && (
-                    <ul className='list-group mb-3'>
-                      {this.state.searchResults.map((site) => (
-                        <li
-                          key={site.SiteName}
-                          className='list-group-item list-group-item-action'
-                          onClick={() => this.handleSiteSelect(site)}
-                          style={{ cursor: 'pointer' }}
-                        >{site.SiteName}</li>
-                      ))}
-                    </ul>
-                  )}
-
-                <div className='card'>
+            <div className='mt-1 position-relative'>
+              <SearchBar itemTitle='Site' OnChange={this.handleSearchChange} onSelectItem={this.handleSiteSelect} searchResults={this.state.searchResults}/>
+              {this.state.selectedSite != null &&
+                    <div className='card'>
                     <div className='card-header bg-primary text-white text-center'>
-                        <h5>{this.props.props.SiteName}</h5>
+                        <h5>{this.state.selectedSite.SiteName.charAt(0).toUpperCase() + this.state.selectedSite.SiteName.slice(1)}</h5>
                     </div>
                     <div className='card-body'>
                         <form>
@@ -86,14 +70,14 @@ export class SiteInfo extends React.Component<{props: ISiteInfoProps , searchOnC
                                     <input type='text'
                                     className='form-control'
                                     id='siteProject'
-                                    placeholder={this.props.props.SiteType}/>
+                                    placeholder={this.state.selectedSite.SiteType}/>
                                 </div>
                                 <div className='form-group col-md-6'>
                                     <label>Kadaa - قضاء</label>
                                     <input type='text'
                                     className='form-control'
                                     id='kadaa'
-                                    placeholder={this.props.props.Kadaa} />
+                                    placeholder={this.state.selectedSite.Kadaa} />
                                 </div>
                             </div>
                             <div className='d-flex p-2'>
@@ -109,7 +93,7 @@ export class SiteInfo extends React.Component<{props: ISiteInfoProps , searchOnC
                                     <input type='text'
                                     className='form-control'
                                     id='siteSecure'
-                                    placeholder={this.props.props.IsSecure ? 'Yes' : 'No'} />
+                                    placeholder={this.state.selectedSite.IsSecure ? 'Yes' : 'No'} />
                                 </div>
                             </div>
 
@@ -120,14 +104,16 @@ export class SiteInfo extends React.Component<{props: ISiteInfoProps , searchOnC
                                 <input type='text'
                                 className='form-control'
                                 id='priority'
-                                placeholder={this.props.props.Priority ? this.props.props.Priority.toString() : ''} />
+                                placeholder={this.state.selectedSite.Priority ? this.state.selectedSite.Priority.toString() : ''} />
                               </div>
                               <div className='form-group col-md-6'>
                                 <label>Coordinates</label>
                                 <input type='text'
                                 className='form-control'
                                 id='coordinates'
-                                placeholder={this.props.props.Latitude + ' , ' + this.props.props.Longtitude} />
+                                placeholder={
+                                  this.state.selectedSite.Latitude !== null && this.state.selectedSite.Longtitude !== null ?
+                                  this.state.selectedSite.Latitude + ' , ' + this.state.selectedSite.Longtitude : ''} />
                               </div>
                             </div>
 
@@ -138,14 +124,14 @@ export class SiteInfo extends React.Component<{props: ISiteInfoProps , searchOnC
                                 <input type='text'
                                 className='form-control'
                                 id='armyCenter'
-                                placeholder={this.props.props.NearestArmyCenter}/>
+                                placeholder={this.state.selectedSite.NearestArmyCenter}/>
                               </div>
                               <div className='form-group col-md-6'>
                                 <label>Nearest Army Point Numbers</label>
                                 <input type='text'
                                 className='form-control'
                                 id='armyCenterNumbers'
-                                placeholder={this.props.props.NearstArmyCenterNumber}/>
+                                placeholder={this.state.selectedSite.NearstArmyCenterNumber}/>
                               </div>
                             </div>
 
@@ -155,14 +141,14 @@ export class SiteInfo extends React.Component<{props: ISiteInfoProps , searchOnC
                                     <input type='text'
                                     className='form-control'
                                     id='powerSource'
-                                    placeholder={this.props.props.PowerSource}/>
-                                </div>
+                                    placeholder={this.state.selectedSite.PowerSource}/>
+                              </div>
                               <div className='form-group col-md-6'>
                                 <label>Phone Numbers</label>
                                 <input type='text'
                                 className='form-control'
                                 id='phoneNumbers'
-                                placeholder={this.props.props.PowerSourceNumber}/>
+                                placeholder={this.state.selectedSite.PowerSourceNumber}/>
                               </div>
                             </div>
 
@@ -173,7 +159,7 @@ export class SiteInfo extends React.Component<{props: ISiteInfoProps , searchOnC
                                 <textarea className='form-control'
                                 id='remarks'
                                 rows={3}
-                                placeholder={this.props.props.Remarks}></textarea>
+                                placeholder={this.state.selectedSite.Remarks}></textarea>
                               </div>
                             </div>
 
@@ -192,26 +178,30 @@ export class SiteInfo extends React.Component<{props: ISiteInfoProps , searchOnC
                        </form>
                     </div>
                 </div>
+                  }
             </div>
         );
     }
 
     public searchSite = (siteName: string) : void  => {
-      const result: ISiteInfoProps [] = [];
+      const result: site [] = [];
       try {
-        debugger;
         const query: string = `?$filter=startswith(SiteName,'${siteName}')` + 
         `&$select=SiteName,SiteType,Latitude,Longtitude,PowerSourceNumber,IsSecure,` + 
         `Priority,NearestArmyCenter,NearstArmyCenterNumber,Remarks,Kadaa/Id,Kadaa/Title,` + 
         `PowerSource/Id,PowerSource/Title&$expand=Kadaa,PowerSource`;
         this.spCrudOperations = new SPCrudOperations(this.props.context.spHttpClient,
-                                this.props.context.pageContext.web.absoluteUrl,'Site',query);
+                                this.props.context.pageContext.web.absoluteUrl, 'Site', query);
         this.spCrudOperations._getItemsWithQuery()
         .then((data) => {
           data.map((obj) => {
-            const temp : ISiteInfoProps = {
+            const siteName: string = obj['SiteName'] !== null ? obj['SiteName'].charAt(0).toUpperCase() + obj['SiteName'].slice(1) : '';
+            const siteType: string = obj['SiteType'] !== null ? obj['SiteType'].charAt(0).toUpperCase() + obj['SiteType'].slice(1) : '';
+            const temp: site = {
+              Id: obj['Id'],
               SiteName: obj['SiteName'],
               SiteType: obj['SiteType'],
+              Title : siteName !== '' && siteType !== '' ? siteName + ' - ' + siteType : siteName !== '' ? siteName : '',
               Latitude: obj['Latitude'],
               Longtitude : obj['Longtitude'],
               Priority: obj['Priority'],

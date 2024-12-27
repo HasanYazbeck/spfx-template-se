@@ -3,7 +3,7 @@ import styles from './Spfx.module.scss';
 import { ISpfxProps } from './ISpfxProps';
 import 'bootstrap/dist/css/bootstrap.min.css';
 // import { BsAlarm } from "react-icons/bs";
-import TabsComponent from './TabsComponent';
+import TabsComponent from './TabsComponent/TabsComponent';
 
 export interface ISpfxState {
   newItemTitle: string; // State to store the value of the new item input field

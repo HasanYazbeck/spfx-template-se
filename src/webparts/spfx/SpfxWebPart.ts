@@ -21,7 +21,6 @@ export default class SpfxWebPart extends BaseClientSideWebPart<ISpfxWebPartProps
 
   private getList = (): void => {
     try {
-      debugger;
       this.spCrudOperations = new SPCrudOperations(
         this.context.spHttpClient,
         this.context.pageContext.web.absoluteUrl,
