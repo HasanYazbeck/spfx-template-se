@@ -70,24 +70,17 @@
     // width: 300px;
     margin: 20px auto;
     font-family: Arial, sans-serif;
-    background-color: #f4f9fd;
-    border: 1px solid #c0d3eb;
+    background-color: #ffffff;
+    // border: 1px solid #c0d3eb;
     border-radius: 8px;
     overflow: hidden;
     color: #333;
   }
   
   .profileHeader {
-    background-color: #0d6efd;
+    // background-color: #0d6efd;
     text-align: center;
-    padding: 20px 10px;
-    color: white;
-  }
-  
-  .profileAvatar img {
-    border-radius: 50%;
-    width: 80px;
-    height: 80px;
+    padding: 10px 10px;
   }
   
   .profileStats {
@@ -111,14 +104,14 @@
   
   .postBox {
     padding: 10px;
-    background-color: #f4f9fd;
+    background-color: #ffffff;
   }
   
   .postBox textarea {
     width: 100%;
     height: 60px;
     padding: 10px;
-    border: 1px solid #c0d3eb;
+    border: 1px solid #746A44;
     border-radius: 4px;
     margin-bottom: 10px;
     font-size: 14px;
@@ -126,7 +119,7 @@
   
   .postBox button {
     width: 100%;
-    background-color: #0d6efd;
+    background-color: #383131;
     color: white;
     border: none;
     padding: 10px;
@@ -136,7 +129,7 @@
   }
   
   .postBox button:hover {
-    background-color: #0d6efd;
+    background-color: #383131;
   }
   
   .post {
@@ -150,7 +143,7 @@
   .itemDetails {
     // max-width: 400px;
     margin: 20px auto;
-    font-family: 'Segoe UI Web (West European)';
+    // font-family: 'Segoe UI Web (West European)';
   }
   
   .formGroup {
@@ -183,7 +176,7 @@
     flex: 0 0 100px; /* Set a fixed width for the labels */
     text-align: right; /* Align text to the right */
     margin-right: 10px; /* Add spacing between label and input */
-    color: white;
+    color: black;
     font-size: medium;
   }
   

@@ -1,10 +1,9 @@
-import { WebPartContext } from '@microsoft/sp-webpart-base';
-
 export interface ISearchBarProps<T> {
     onSelectItem?: (item: any | null) => void ;
     OnChange: React.ChangeEventHandler<HTMLInputElement>;
-    searchResults: any[];
+    searchResults: T[];
     itemTitle: string;
+    keyId: string;
 }
 
 export interface ISearchBarState<T>{

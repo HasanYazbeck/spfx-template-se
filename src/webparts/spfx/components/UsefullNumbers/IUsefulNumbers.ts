@@ -18,4 +18,3 @@ export interface IUsefullNumberState {
     searchResults: PhoneNumber[];
     selectedItem: PhoneNumber;
 }
-

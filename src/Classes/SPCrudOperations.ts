@@ -213,7 +213,7 @@ import { FieldTypeKind } from '../Enums/enums';
   }
   
   // Update Item 
-  public async _updateItem(itemId: string , item: ISPItem): Promise<SPHttpClientResponse>{
+  public async _updateItem(itemId: string , item: any): Promise<SPHttpClientResponse>{
     const url: string = `${this.siteUrl}/_api/web/lists/getbytitle('${this.listName}')/items(${itemId})`;
     const spHttpClientOptions: ISPHttpClientOptions = {
       headers: {
@@ -293,5 +293,61 @@ import { FieldTypeKind } from '../Enums/enums';
         console.error('Error Retreiving Item', error);
         throw error;
       }
+  }
+
+  // Get userPermission
+  public async hasPermission(): Promise<boolean>{
+    const url: string = `${this.siteUrl}/_api/web/effectiveBasePermissions`;
+
+    try {
+      const response = await this.spHttpClient.get(url, SPHttpClient.configurations.v1);
+      const permissions = await response.json();
+      const hasPermission = permissions && permissions.High && permissions.Low;
+      return hasPermission;
+
+    } catch (ex){
+      console.error('Error getting user permission', ex);
+      return false;
+    }
+  }
+
+  // Checks if logged in user is a site administrator
+  public async IsCurrentUserSiteAdmin(): Promise<boolean>{
+    const url: string = `${this.siteUrl}/_api/web/currentuser/isSiteAdmin`;
+
+    try {
+      const response = await this.spHttpClient.get(url, SPHttpClient.configurations.v1);
+      const isAdmin = await response.json();
+      return isAdmin.value;
+    } catch (ex){
+      console.error('Error getting site admin permission', ex);
+      return false;
+    }
+  }
+
+  // Checks if logged in user is a site administrator
+  public async GetSPUsers(): Promise<IUser[]>{
+    const url: string = `${this.siteUrl}/_api/web/siteusers`;
+    let result: IUser[] = [];
+    try {
+      const response = await this.spHttpClient.get(url, SPHttpClient.configurations.v1);
+      if (response.status === 200) {
+        const responseData: any = await response.json();
+        result = responseData.value.map((user: any) => {
+
+        });
+        // console.log('Items retrieved successfully:', responseData.value);
+        return result;
+      } else {
+        const responseError: any = await response.json();
+        console.log(`Error retrieving users. Status: ${responseError.status}`, responseError);
+        // alert('Error Message' + JSON.stringify(responseError));
+        throw new Error(`Error retrieving items. Status: ${responseError.status}`
+        );
+      }
+    } catch (ex){
+      console.error('Error getting site users', ex);
+      return undefined;
+    }
   }
 }

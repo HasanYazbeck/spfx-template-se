@@ -1,14 +1,9 @@
 import * as React from 'react';
 import styles from './Spfx.module.scss';
-import { ISpfxProps } from './ISpfxProps';
+import { ISpfxProps , ISpfxState} from './ISpfxProps';
 import 'bootstrap/dist/css/bootstrap.min.css';
 // import { BsAlarm } from "react-icons/bs";
 import TabsComponent from './TabsComponent/TabsComponent';
-
-export interface ISpfxState {
-  newItemTitle: string; // State to store the value of the new item input field
-  personId: number;
-}
 
 export default class Spfx extends React.Component < ISpfxProps, ISpfxState > {
   constructor(props: ISpfxProps) {
@@ -19,22 +14,22 @@ export default class Spfx extends React.Component < ISpfxProps, ISpfxState > {
     };
   }
    // Handle input change to store new item title in the state
-   private handleInputChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
-    this.setState({ newItemTitle: event.target.value});
-  }
+  //  private handleInputChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
+  //   this.setState({ newItemTitle: event.target.value});
+  // }
 
     // Call the parent addItem function with the new item
-    private handleAddItem = (): void => {
-      if (!this.state.newItemTitle.trim()) {
-        alert('Please enter a valid title for the item.');
-        return;
-      }
-      const newItem = {Title: this.state.newItemTitle}; // Assuming 'Title' is the name of the column in SharePoint
-      // Call the parent method to add the item
-      this.props.onAddItem(newItem);
-      // Clear the input field after submission
-      this.setState({ newItemTitle: '' });
-    }
+    // private handleAddItem = (): void => {
+    //   if (!this.state.newItemTitle.trim()) {
+    //     alert('Please enter a valid title for the item.');
+    //     return;
+    //   }
+    //   const newItem = {Title: this.state.newItemTitle}; // Assuming 'Title' is the name of the column in SharePoint
+    //   // Call the parent method to add the item
+    //   this.props.onAddItem(newItem);
+    //   // Clear the input field after submission
+    //   this.setState({ newItemTitle: '' });
+    // }
 
   public render(): React.ReactElement<ISpfxProps> {
     // const { items } = this.props;

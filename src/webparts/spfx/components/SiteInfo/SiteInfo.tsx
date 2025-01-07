@@ -1,34 +1,16 @@
 import * as React from 'react';
 import {site, ISiteInfoProps , ISiteInfoState } from './ISiteInfoProps';
-import { SPCrudOperations } from '../../../Classes/SPCrudOperations';
-import { WebPartContext } from '@microsoft/sp-webpart-base';
+import { SPCrudOperations } from '../../../../Classes/SPCrudOperations';
 import { SearchBar } from '../SearchBarComponent/SearchBar';
-
+import styles from '../Spfx.module.scss';
 
 export class SiteInfo extends React.Component<ISiteInfoProps, ISiteInfoState> {
     private spCrudOperations: SPCrudOperations ;
-
-    // private  siteInfoProps: site = {
-    //   Title: '',
-    //   SiteName: '',
-    //   SiteType: '',
-    //   Latitude: '',
-    //   Longtitude: '',
-    //   PowerSource: '',
-    //   PowerSourceNumber: '',
-    //   Kadaa: '',
-    //   IsSecure: false,
-    //   Priority: 0,
-    //   NearestArmyCenter: '',
-    //   NearstArmyCenterNumber: '',
-    //   Remarks: '',
-    //   Id: 0
-    // };
     constructor(props: ISiteInfoProps) {
       super();
       this.state = {
         searchResults: [],
-        selectedSite: null,
+        selectedSite: undefined
       };
     }
 
@@ -36,75 +18,80 @@ export class SiteInfo extends React.Component<ISiteInfoProps, ISiteInfoState> {
   private handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     let siteName: string = event.currentTarget.value;
     siteName = siteName.replace(/'/g, "''");
-    if (siteName === ''){
-      this.setState({ selectedSite: null, searchResults: []});
+    if (siteName === '') {
+      this.setState({ selectedSite: undefined, searchResults: []});
     } else {
       this.searchSite(siteName);
     }
-  };
+  }
 
   // Handle site selection
-  private   handleSiteSelect = (site: site) => {
-    if (site.Id !== 0){
+  private handleSiteSelect = (site: site) => {
+    if (site.Id !== 0) {
       this.setState({ selectedSite: site, searchResults: []});
     } else {
-      this.setState({ selectedSite: null, searchResults: []});
+      this.setState({ selectedSite: undefined, searchResults: []});
     }
-  };
+  }
 
     public render(): React.ReactElement<{}> {
         return (
             <div className='mt-1 position-relative'>
-              <SearchBar itemTitle='Site' OnChange={this.handleSearchChange} onSelectItem={this.handleSiteSelect} searchResults={this.state.searchResults}/>
-              {this.state.selectedSite != null &&
+              <SearchBar keyId={'SiteInfoSearchBar'} 
+                        itemTitle='Site' 
+                        OnChange={this.handleSearchChange} 
+                        onSelectItem={this.handleSiteSelect} 
+                        searchResults={this.state.searchResults}/>
+              {this.state.selectedSite !== undefined &&
                     <div className='card'>
-                    <div className='card-header bg-primary text-white text-center'>
-                        <h5>{this.state.selectedSite.SiteName.charAt(0).toUpperCase() + this.state.selectedSite.SiteName.slice(1)}</h5>
+                    <div className={`card-header text-white text-center`} style={{backgroundColor: '#4d784e'}}>
+                        <h5>{this.state.selectedSite.Title.charAt(0).toUpperCase() 
+                        + this.state.selectedSite.Title.slice(1)}</h5>
                     </div>
                     <div className='card-body'>
                         <form>
                             {/* <!-- Site Information --> */}
-                            <div className='d-flex p-2 mr-2'>
+                            <div className='row'>
                                 <div className='form-group col-md-6'>
                                     <label>Site Project</label>
                                     <input type='text'
                                     className='form-control'
                                     id='siteProject'
-                                    placeholder={this.state.selectedSite.SiteType}/>
+                                    placeholder={this.state.selectedSite.SiteType} disabled/>
                                 </div>
                                 <div className='form-group col-md-6'>
                                     <label>Kadaa - قضاء</label>
                                     <input type='text'
                                     className='form-control'
                                     id='kadaa'
-                                    placeholder={this.state.selectedSite.Kadaa} />
+                                    placeholder={this.state.selectedSite.Kaza} disabled/>
                                 </div>
                             </div>
-                            <div className='d-flex p-2'>
+                            <div className='row'>
                                  <div className='form-group col-md-6'>
                                     <label>Site Usage</label>
                                     <input type='text'
                                     className='form-control'
                                     id='siteUsage'
-                                    placeholder=''/>
+                                    placeholder='' disabled/>
                                 </div>
                                 <div className='form-group col-md-6'>
                                     <label>Site Secure</label>
                                     <input type='text'
                                     className='form-control'
                                     id='siteSecure'
-                                    placeholder={this.state.selectedSite.IsSecure ? 'Yes' : 'No'} />
+                                    placeholder={this.state.selectedSite.IsSecure ? 'Yes' : 'No'} disabled/>
                                 </div>
                             </div>
 
                             {/* <!-- Priority and Coordinates --> */}
-                            <div className='d-flex p-2'>
+                            <div className='row'>
                               <div className='form-group col-md-6'>
                                 <label >Priority</label>
                                 <input type='text'
                                 className='form-control'
                                 id='priority'
-                                placeholder={this.state.selectedSite.Priority ? this.state.selectedSite.Priority.toString() : ''} />
+                                placeholder={this.state.selectedSite.Priority ? this.state.selectedSite.Priority.toString() : ''} disabled/>
                               </div>
                               <div className='form-group col-md-6'>
                                 <label>Coordinates</label>
@@ -113,47 +100,47 @@ export class SiteInfo extends React.Component<ISiteInfoProps, ISiteInfoState> {
                                 id='coordinates'
                                 placeholder={
                                   this.state.selectedSite.Latitude !== null && this.state.selectedSite.Longtitude !== null ?
-                                  this.state.selectedSite.Latitude + ' , ' + this.state.selectedSite.Longtitude : ''} />
+                                  this.state.selectedSite.Latitude + ' , ' + this.state.selectedSite.Longtitude : ''} disabled/>
                               </div>
                             </div>
 
                             {/* <!-- Nearest Army Point and Phone Numbers --> */}
-                            <div className='d-flex p-2'>
+                            <div className='row'>
                               <div className='form-group col-md-6'>
                                 <label>Nearest Army Point</label>
                                 <input type='text'
                                 className='form-control'
                                 id='armyCenter'
-                                placeholder={this.state.selectedSite.NearestArmyCenter}/>
+                                placeholder={this.state.selectedSite.NearestArmyCenter} disabled/>
                               </div>
                               <div className='form-group col-md-6'>
                                 <label>Nearest Army Point Numbers</label>
                                 <input type='text'
                                 className='form-control'
                                 id='armyCenterNumbers'
-                                placeholder={this.state.selectedSite.NearstArmyCenterNumber}/>
+                                placeholder={this.state.selectedSite.NearestArmyCenterNumber} disabled/>
                               </div>
                             </div>
 
-                            <div className='d-flex p-2'>
+                            <div className='row'>
                             <div className='form-group col-md-6'>
                                     <label>Power Source</label>
                                     <input type='text'
                                     className='form-control'
                                     id='powerSource'
-                                    placeholder={this.state.selectedSite.PowerSource}/>
+                                    placeholder={this.state.selectedSite.PowerSource} disabled/>
                               </div>
                               <div className='form-group col-md-6'>
                                 <label>Phone Numbers</label>
                                 <input type='text'
                                 className='form-control'
                                 id='phoneNumbers'
-                                placeholder={this.state.selectedSite.PowerSourceNumber}/>
+                                placeholder={this.state.selectedSite.PowerSourceNumber} disabled/>
                               </div>
                             </div>
 
                             {/* <!-- Remarks --> */}
-                            <div className='form-row p-2'>
+                            <div className='form-row'>
                               <div className='form-group col-md-12'>
                                 <label>Remarks</label>
                                 <textarea className='form-control'
@@ -164,7 +151,7 @@ export class SiteInfo extends React.Component<ISiteInfoProps, ISiteInfoState> {
                             </div>
 
                             {/* <!-- Power Control --> */}
-                             <div className='form-row p-2'>
+                             {/* <div className='form-row'>
                                <div className='form-group col-md-6'>
                                  <h6>Power Control</h6>
                                  <ul className='list-group'>
@@ -174,7 +161,7 @@ export class SiteInfo extends React.Component<ISiteInfoProps, ISiteInfoState> {
                                    <li className='list-group-item'>Ogero: 09645510</li>
                                  </ul>
                                </div>
-                             </div>
+                             </div> */}
                        </form>
                     </div>
                 </div>
@@ -183,35 +170,37 @@ export class SiteInfo extends React.Component<ISiteInfoProps, ISiteInfoState> {
         );
     }
 
-    public searchSite = (siteName: string) : void  => {
+    public searchSite = (siteName: string): void  => {
       const result: site [] = [];
       try {
-        const query: string = `?$filter=startswith(SiteName,'${siteName}')` + 
-        `&$select=SiteName,SiteType,Latitude,Longtitude,PowerSourceNumber,IsSecure,` + 
-        `Priority,NearestArmyCenter,NearstArmyCenterNumber,Remarks,Kadaa/Id,Kadaa/Title,` + 
-        `PowerSource/Id,PowerSource/Title&$expand=Kadaa,PowerSource`;
+        const query: string = `?$filter=startswith(Title,'${siteName}')` +
+        `&$select=Title,Latitude,Logtitude,PowerSourceNumber,IsSecure,Priority,NearestArmyCenter,NearestArmyCenterNumber,Remarks,`+
+        `Kaza/Id,Kaza/Title,SiteType/Id,SiteType/Title,PowerSource/Id,PowerSource/Title`+
+        `&$expand=Kaza,PowerSource,SiteType`;
         this.spCrudOperations = new SPCrudOperations(this.props.context.spHttpClient,
                                 this.props.context.pageContext.web.absoluteUrl, 'Site', query);
         this.spCrudOperations._getItemsWithQuery()
         .then((data) => {
           data.map((obj) => {
-            const siteName: string = obj['SiteName'] !== null ? obj['SiteName'].charAt(0).toUpperCase() + obj['SiteName'].slice(1) : '';
-            const siteType: string = obj['SiteType'] !== null ? obj['SiteType'].charAt(0).toUpperCase() + obj['SiteType'].slice(1) : '';
+            let siteType: string = '';
+            obj.SiteType.map((item: any) => {
+              siteType = siteType === '' ? item.Title.charAt(0).toUpperCase() + item.Title.slice(1) : siteType + '-' + item.Title.charAt(0).toUpperCase() + item.Title.slice(1);
+            });
+            debugger;
             const temp: site = {
-              Id: obj['Id'],
-              SiteName: obj['SiteName'],
-              SiteType: obj['SiteType'],
-              Title : siteName !== '' && siteType !== '' ? siteName + ' - ' + siteType : siteName !== '' ? siteName : '',
-              Latitude: obj['Latitude'],
-              Longtitude : obj['Longtitude'],
-              Priority: obj['Priority'],
-              Remarks: obj['Remarks'],
-              NearestArmyCenter: obj['NearestArmyCenter'],
-              NearstArmyCenterNumber: obj['NearstArmyCenterNumber'],
-              PowerSourceNumber: obj['PowerSourceNumber'],         
-              IsSecure: obj['IsSecure'],
-              Kadaa: obj.Kadaa.Title,
-              PowerSource: obj.PowerSource.Title,
+              Id: obj['id'] !== undefined ? obj['id'] : '',
+              Title: obj['Title'] !== undefined ? obj['Title'].charAt(0).toUpperCase() + obj['Title'].slice(1) : '',
+              SiteType: siteType,
+              Latitude: obj['Latitude'] !== undefined ? obj['Latitude'] : '',
+              Longtitude : obj['Logtitude'] !== undefined ? obj['Logtitude'] : '',
+              Priority: obj['Priority'] !== undefined ? obj['Priority'] : 0,
+              Remarks: obj['Remarks'] !== undefined ? obj['Remarks'] : '',
+              NearestArmyCenter: obj['NearestArmyCenter'] !== undefined ? obj['NearestArmyCenter'] : '',
+              NearestArmyCenterNumber: obj['NearestArmyCenterNumber'] !== undefined ? obj['NearestArmyCenterNumber'] : '',
+              PowerSourceNumber: obj['PowerSourceNumber'] !== undefined ? obj['PowerSourceNumber'] : '',      
+              IsSecure: obj['IsSecure'] !== undefined ? obj['IsSecure'] : '',
+              Kaza: obj.Kaza !== undefined ? obj.Kaza.Title : '',
+              PowerSource: obj.PowerSource !== undefined ? obj.PowerSource.Title : ''
             };
             result.push(temp);
           });

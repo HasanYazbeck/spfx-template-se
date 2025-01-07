@@ -1,17 +1,16 @@
-import { WebPartContext } from "@microsoft/sp-webpart-base";
+import { WebPartContext } from '@microsoft/sp-webpart-base';
 
 export type site = {
-  Title: string;
   Id?: number;
-  SiteName: string;
+  Title: string;
   SiteType: string;
-  Kadaa?: string;
+  Kaza?: string;
   IsSecure?: boolean;
   PowerSource?: string;
   PowerSourceNumber?: string;
   Priority?: number;
   NearestArmyCenter?: string;
-  NearstArmyCenterNumber?: string;
+  NearestArmyCenterNumber?: string;
   Remarks?: string;
   Latitude?: string;
   Longtitude?: string;

@@ -6,16 +6,16 @@ import { SearchBar } from '../SearchBarComponent/SearchBar';
 import {IUsefullNumberState , IUsefullNumberProps, PhoneNumber} from './IUsefulNumbers';
 
 // Classess
-import { SPCrudOperations } from '../../../Classes/SPCrudOperations';
+import { SPCrudOperations } from '../../../../Classes/SPCrudOperations';
 
 // Styles
 import styles from './UsefullNumbers.module.scss';
-import 'bootstrap/dist/css/bootstrap.min.css';
 
-export class UsefullNumbersDirectory  extends React.Component<IUsefullNumberProps, IUsefullNumberState> {
+
+export class UsefullNumbersDirectory extends React.Component<IUsefullNumberProps, IUsefullNumberState> {
   state: IUsefullNumberState = {
     searchResults: [],
-    selectedItem: null,
+    selectedItem: null
   };
 
   private spCrudOperations: SPCrudOperations;
@@ -47,84 +47,66 @@ export class UsefullNumbersDirectory  extends React.Component<IUsefullNumberProp
     return(
       <div className='directory-container'>
         <div className='mt-1 position-relative'>
-          <SearchBar itemTitle='Usefull Numbers' OnChange={this.handleSearchChange} 
+          <SearchBar keyId={'UseFullNumbersSearchBar'} itemTitle='Usefull Numbers' OnChange={this.handleSearchChange}
           onSelectItem={this.handleItemSelect} searchResults={this.state.searchResults}/>
         </div>
         {
-          this.state.selectedItem !== null && <div className={`${styles.profileContainer}`}>
+        this.state.selectedItem !== null && <div className={`${styles.profileContainer}`}>
           <div className={`${styles.profileHeader}`}>
-           <div className={`${styles.profileAvatar}`}>
-              <img src="https://via.placeholder.com/100" alt="User Avatar" />
-          </div>
               <div className={`${styles.itemDetails}`}>
-                <div className={`d-flex align-items-center col-md-12`}>
-                  <label htmlFor="title" className={`p-3 ${styles.formLabel}`}>Title</label>
-                  <input type="text" id="title" value={this.state.selectedItem.Title} 
-                         className={`${styles.formControl}`} readOnly />
+                <div className={`row align-items-center col-md-12`}>
+                  <label htmlFor='title' className={`p-3 col-md-2`}>Name</label>
+                  <input type='text' id='title' value={this.state.selectedItem.Title !== undefined ? this.state.selectedItem.Title : ''}
+                    className={`${styles.formControl}`} disabled/>
                 </div>
-                <div className={`d-flex align-items-center col-md-12`}>
-                  <label htmlFor="number" className={`p-3 ${styles.formLabel}`}>Number</label>
-                  <input type="text" id="number" value={this.state.selectedItem.Number} 
-                  className={`${styles.formControl}`} readOnly />
+                <div className={`row align-items-center col-md-12`}>
+                  <label htmlFor='number' className={`p-3 col-md-2`}>Number</label>
+                  <input type='text' id='number' value={this.state.selectedItem.Number}
+                  className={`${styles.formControl}`} disabled />
                 </div>
-                <div className={`d-flex align-items-center col-md-12`}>
-                  <label htmlFor="region" className={`p-3 ${styles.formLabel}`}>Region</label>
-                  <input type="text" id="region" value={this.state.selectedItem.Region} 
-                  className={`${styles.formControl}`} readOnly />
+                <div className={`row align-items-center col-md-12`}>
+                  <label htmlFor='region' className={`p-3 col-md-2`}>Region</label>
+                  <input type='text' id='region' value={this.state.selectedItem.Region}
+                  className={`${styles.formControl}`} disabled />
                 </div>
-                <div className={`d-flex align-items-center col-md-12`}>
-                  <label htmlFor="category" className={`p-3 ${styles.formLabel}`}>Category</label>
-                  <input type="text" id="category" value={this.state.selectedItem.Category} 
-                  className={`${styles.formControl}`} readOnly />
+                <div className={`row align-items-center col-md-12`}>
+                  <label htmlFor='category' className={`p-3 col-md-2`}>Category</label>
+                  <input type='text' id='category' value={this.state.selectedItem.Category}
+                  className={`${styles.formControl}`} disabled />
                 </div>
               </div>
             </div>
-
-            {/* <div className={`${styles.profileStats}`}>
-                <div>
-                  <span>752</span>
-                  <p>Posts</p>
-                </div>
-                <div>
-                  <span>128</span>
-                  <p>Followers</p>
-                </div>
-              </div> */
-            }
             <div className={`${styles.postBox}`}>
-              <textarea placeholder="Leave a new remark..."></textarea>
-              <button type="button">Post Remarks</button>
+              <textarea placeholder='Leave a new remark...'></textarea>
+              <button type='button'>Post Remarks</button>
             </div>
         </div>
         }
-        
-   
     </div>
     );
   }
 
-  public searchUsefullNumber = (phoneNumber: string) : void  => {
+  public searchUsefullNumber = (phoneNumber: string): void  => {
     const result: PhoneNumber [] = [];
     try {
       const query: string = `?$filter=startswith(Title,'${phoneNumber}')` +
-                            `&$select=Title,Number,Category,` +
-                            `Regions/Id,Regions/Title` +
-                            `&$expand=Regions`;
+                            `&$select=Title,PhoneNumber,Category,` +
+                            `Region/Id,Region/Title` +
+                            `&$expand=Region`;
       this.spCrudOperations = new SPCrudOperations(this.props.context.spHttpClient,
                               this.props.context.pageContext.web.absoluteUrl, 'Usefull Numbers', query);
       this.spCrudOperations._getItemsWithQuery()
       .then((data) => {
         data.map((obj) => {
-          const name: string = obj['Title'] !== null ? obj['Title'].charAt(0).toUpperCase() + obj['Title'].slice(1) : '';
           const temp: PhoneNumber = {
-            Title: name,
-            Number: obj['Number'],
-            Category: obj['Category'],
-            Region: obj.Regions.Title,
+            Title: obj['Title'] !== undefined ? obj['Title'].charAt(0).toUpperCase() + obj['Title'].slice(1) : '',
+            Number: obj['PhoneNumber'] !== undefined ? obj['PhoneNumber'] : '',
+            Category: obj['Category'] !== undefined ? obj['Category'] : '',
+            Region: obj.Region !== undefined ?  obj.Region.Title : ''
           };
           result.push(temp);
         });
-        this.setState({ searchResults : result });
+        this.setState({ searchResults: result });
         console.log('Item retreived successfully!', data);
       })
       .catch(error => {
@@ -134,6 +116,4 @@ export class UsefullNumbersDirectory  extends React.Component<IUsefullNumberProp
     console.error('An error has occurred!', error);
     }
   }
-
-
 }

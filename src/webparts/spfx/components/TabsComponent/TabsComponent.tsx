@@ -1,37 +1,37 @@
 import * as React from 'react';
 
 // Styles
-import styles from '../Spfx.module.scss';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import styles from '../Spfx.module.scss';
 
 // Interfaces
 import {site} from '../SiteInfo/ISiteInfoProps';
 import {PhoneNumber} from '../UsefullNumbers/IUsefulNumbers';
 import {ITabsComponentProps , ITabsComponentState} from './ITabsComponent';
-
-// Classess
-import { SPCrudOperations } from '../../../Classes/SPCrudOperations';
+import { Report } from '../Report/IReport';
+import { Problem } from '../Problems/IProblems';
 
 // Components
 import { SiteInfo } from '../SiteInfo/SiteInfo';
 import {UsefullNumbersDirectory} from '../UsefullNumbers/UsefulNumbersDirectory';
+import { Problems } from '../Problems/Problems';
+import { Reports } from '../Report/Report';
 
 export default class TabsComponent extends React.Component<ITabsComponentProps, ITabsComponentState> {
   private  siteInfoProps: site = {
     Id: 0,
     Title: '',
-    SiteName: '',
     SiteType: '',
     Latitude: '',
     Longtitude: '',
     PowerSource: '',
     PowerSourceNumber: '',
-    Kadaa: '',
+    Kaza: '',
     IsSecure: false,
     Priority: 0,
     NearestArmyCenter: '',
-    NearstArmyCenterNumber: '',
-    Remarks: '',
+    NearestArmyCenterNumber: '',
+    Remarks: ''
   };
   private usefullNumber : PhoneNumber = {
     Title: '',
@@ -39,12 +39,19 @@ export default class TabsComponent extends React.Component<ITabsComponentProps, 
     Category: '',
     Region: ''
   };
+  private problem: Problem = {
+    Title: '',
+    SieName: ''
+  };
+  private report: Report = {
+    Title: ''
+  };
   constructor(props: ITabsComponentProps) {
     super();
     this.state = {
       activeTab: 'site-tab' // Default active tab
     };
-  };
+  }
 
   /**
    * Handles tab change when a user clicks on a tab
@@ -61,23 +68,23 @@ export default class TabsComponent extends React.Component<ITabsComponentProps, 
       <div>
         <ul className={`nav nav-tabs`} id='nav-bar-tab' role='tablist'>
           <li className={`nav-item`} role='presentation'>
-            <button className={`nav-link ${activeTab === 'site-tab' ? 'active' : 'text-white'} ${styles.navLinkBg}`} 
+            <button className={`nav-link ${activeTab === 'site-tab' ? 'active' : 'text-white'} ${styles.navLinkBg} ${styles.fsl}`}
             id='site-tab' type='button'
             role='tab' onClick={() => this.handleTabChange('site-tab')}>Sites</button>
           </li>
           <li className={`nav-item`} role='presentation'>
-            <button className={`nav-link ${activeTab === 'problems-tab' ? 'active' : 'text-white'} ${styles.navLinkBg}`} 
-            id='problems-tab' type='button' role='tab'
-            onClick={() => this.handleTabChange('problems-tab')}>Problems</button>
-          </li>
-          <li className={`nav-item`} role='presentation'>
-            <button className={`nav-link ${activeTab === 'userfulNumbers-tab' ? 'active' : 'text-white'} ${styles.navLinkBg}`} 
+            <button className={`nav-link ${activeTab === 'userfulNumbers-tab' ? 'active' : 'text-white'} ${styles.navLinkBg} ${styles.fsl}`}
             id='userfulNumbers-tab'
             type='button'
             role='tab' onClick={() => this.handleTabChange('userfulNumbers-tab')}>Useful Numbers</button>
           </li>
           <li className={`nav-item`} role='presentation'>
-            <button className={`nav-link ${activeTab === 'report-tab' ? 'active' : 'text-white'} ${styles.navLinkBg}`}
+            <button className={`nav-link ${activeTab === 'problems-tab' ? 'active' : 'text-white'} ${styles.navLinkBg} ${styles.fsl}`}
+            id='problems-tab' type='button' role='tab'
+            onClick={() => this.handleTabChange('problems-tab')}>Site Problems</button>
+          </li>
+          <li className={`nav-item`} role='presentation'>
+            <button className={`nav-link ${activeTab === 'report-tab' ? 'active' : 'text-white'} ${styles.navLinkBg} ${styles.fsl}`}
             id='report-tab'
             type='button'
             role='tab' onClick={() => this.handleTabChange('report-tab')}>Report</button>
@@ -90,22 +97,20 @@ export default class TabsComponent extends React.Component<ITabsComponentProps, 
           role='tabpanel'>
             <SiteInfo siteInfo={this.siteInfoProps} context={this.props.context}/>
           </div>
+          <div className={`tab-pane fade ${activeTab === 'userfulNumbers-tab' ? 'show active' : ''}`}
+              id='userfulNumbers-tab-pane' role='tabpanel'>
+              <UsefullNumbersDirectory usefullNumber={this.usefullNumber} context={this.props.context}/>
+          </div>
           <div className={`tab-pane fade ${activeTab === 'problems-tab' ? 'show active' : ''}`}
           id='problems-tab-pane' role='tabpanel'>
-            Problems Content
-          </div>
-          <div className={`tab-pane fade ${activeTab === 'userfulNumbers-tab' ? 'show active' : ''}`}
-          id='userfulNumbers-tab-pane' role='tabpanel'>
-           <UsefullNumbersDirectory usefullNumber={this.usefullNumber} context={this.props.context}/>
+            <Problems context={this.props.context} problem={this.problem} />
           </div>
           <div className={`tab-pane fade ${activeTab === 'report-tab' ? 'show active' : ''}`}
           id='report-tab-pane' role='tabpanel'>
-            Report Content
+            <Reports context={this.props.context} report={this.report} />
           </div>
         </div>
       </div>
     );
-  }
-
- 
+  } 
 }

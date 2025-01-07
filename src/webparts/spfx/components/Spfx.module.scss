@@ -10,9 +10,7 @@
   .row {
     @include ms-Grid-row;
     @include ms-fontColor-white;
-    background-color: rgb(13, 110, 253);
-    // background-color: #9aa9b5;
-    // background-color: $ms-color-themePrimary;
+    background-color: #4d784e;
     padding: 20px;
   }
 
@@ -125,9 +123,13 @@
 }
 
 .tabContentBg{
-  background-color: rgb(13, 110, 253);
+  background-color: #4d784e(13, 110, 253);
 }
 
 .navLinkBg{
-  background-color: rgb(13, 110, 253) !important;
+  background-color: #4d784e(13, 110, 253) !important;
+}
+
+.fsl {
+  font-size: large !important;
 }

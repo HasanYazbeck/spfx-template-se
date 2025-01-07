@@ -1,13 +1,13 @@
 import * as React from 'react';
 import {ISearchBarProps , ISearchBarState } from './ISearchBar';
 
-export class SearchBar extends React.Component<ISearchBarProps<any>, ISearchBarState<any>>{
+export class SearchBar extends React.Component<ISearchBarProps<any>, ISearchBarState<any>> {
     state: ISearchBarState<any> = {
         searchResults: [],
-        selectedItem: null
+        selectedItem: undefined
     };
 
-    constructor(props: ISearchBarProps<any>){
+    constructor(props: ISearchBarProps<any>) {
         super(props);
     }
 
@@ -15,21 +15,21 @@ export class SearchBar extends React.Component<ISearchBarProps<any>, ISearchBarS
       this.setState({selectedItem: item});
       this.props.onSelectItem(item);
     }
- 
+
     public render(): React.ReactElement<{}> {
         return (
         <div>
-            <div className='input-group input-group-sm'>
-                <span className='input-group-text' id='inputGroup-sizing-sm'>Search {this.props.itemTitle}</span>
-                <input onChange={this.props.OnChange}
+            <div className={`input-group input-group-text`}>
+                <span className='input-group-text' id='inputGroup-sizing-sm'>Search</span>
+                <input id= {this.props.keyId} onChange={this.props.OnChange}
                   type='text'
                   className='form-control'
                   aria-label='Sizing example input'
-                  aria-describedby='inputGroup-sizing-sm'/>
+                  aria-describedby='inputGroup-sizing-sm'
+                  />
                 </div>
-        
                 {this.props.searchResults.length > 0 && (
-                    <ul className='list-group position-absolute w-100'   
+                    <ul className='list-group position-absolute w-100'
                     style={{
                       zIndex: 1000,
                       backgroundColor: 'white',

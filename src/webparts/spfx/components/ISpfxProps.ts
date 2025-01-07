@@ -8,3 +8,8 @@ export interface ISpfxProps {
   onAddItem: (item: any) => void;
   context: WebPartContext;
 }
+
+export interface ISpfxState {
+  newItemTitle: string; // State to store the value of the new item input field
+  personId: number;
+}

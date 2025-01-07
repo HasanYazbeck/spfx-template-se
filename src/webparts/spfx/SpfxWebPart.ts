@@ -4,8 +4,8 @@ import { BaseClientSideWebPart, IPropertyPaneConfiguration, PropertyPaneTextFiel
 import * as strings from 'SpfxWebPartStrings';
 import Spfx from './components/Spfx';
 import { ISpfxProps } from './components/ISpfxProps';
-import { SPCrudOperations } from '../Classes/SPCrudOperations';
-import { ISPItem } from '../Interfaces/ISPItem';
+import { SPCrudOperations } from '../../Classes/SPCrudOperations';
+import { ISPItem } from '../../Interfaces/ISPItem';
 
 export interface ISpfxWebPartProps {
   description: string;
@@ -109,6 +109,4 @@ export default class SpfxWebPart extends BaseClientSideWebPart<ISpfxWebPartProps
       ]
     };
   }
-
-  
 }

@@ -9,10 +9,19 @@
           "manifest": "./src/webparts/spfx/SpfxWebPart.manifest.json"
         }
       ]
+    },
+    "calender-events-se-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/calenderEventsSe/CalenderEventsSeWebPart.js",
+          "manifest": "./src/webparts/calenderEventsSe/CalenderEventsSeWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
   "localizedResources": {
-    "SpfxWebPartStrings": "lib/webparts/spfx/loc/{locale}.js"
+    "SpfxWebPartStrings": "lib/webparts/spfx/loc/{locale}.js",
+    "CalenderEventsSeWebPartStrings": "lib/webparts/calenderEventsSe/loc/{locale}.js"
   }
 }

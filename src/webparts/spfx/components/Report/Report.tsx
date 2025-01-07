@@ -1,16 +1,16 @@
 import * as React from 'react';
-import {IProblemsProps , IProblemsState , Problem } from './IProblems';
+import {IReportProps , IReportState , Report } from './IReport';
 import { SPCrudOperations } from '../../../../Classes/SPCrudOperations';
 import { SearchBar } from '../SearchBarComponent/SearchBar';
 
-export class Problems extends React.Component<IProblemsProps, IProblemsState> {
+export class Reports extends React.Component<IReportProps, IReportState> {
     private spCrudOperations: SPCrudOperations;
-    state: IProblemsState = {
+    state: IReportState = {
         searchResults: [],
         selectedItem: null
       }
 
-    constructor(props: IProblemsProps) {
+    constructor(props: IReportProps) {
         super(props);
     }
    
@@ -18,7 +18,7 @@ export class Problems extends React.Component<IProblemsProps, IProblemsState> {
         return (
             <div className={`directory-container`}>
                 <div className={`mt-1 position-relative`}>
-                  <SearchBar keyId={'PropblemsSearchBar'} itemTitle='Problems' OnChange={this.handleSearchChange}
+                  <SearchBar keyId={'ReportsSearchBar'} itemTitle='Reports' OnChange={this.handleSearchChange}
                   onSelectItem={this.handleItemSelect} searchResults={this.state.searchResults}/>
                 </div>
                 <div className={`p-3 text-white`}>
@@ -30,19 +30,19 @@ export class Problems extends React.Component<IProblemsProps, IProblemsState> {
 
     // Handle search input change
     private handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      let probkemTitle: string = event.currentTarget.value;
-      probkemTitle = probkemTitle.replace(/'/g, "''");
-        if (probkemTitle === '' ) {
+      let reportTitle: string = event.currentTarget.value;
+      reportTitle = reportTitle.replace(/'/g, "''");
+        if (reportTitle === '' ) {
           this.setState({ selectedItem: null, searchResults: []});
         } else {
-          // this.searchProblem(probkemTitle);
+          // this.searchReports(reportTitle);
         }
       }
 
     // Handle site selection
-    private handleItemSelect = (problem: Problem) => {
-      if (problem !== null ) {
-        this.setState({ selectedItem: problem, searchResults: []});
+    private handleItemSelect = (report: Report) => {
+      if (report !== null ) {
+        this.setState({ selectedItem: report, searchResults: []});
       } else {
         this.setState({ selectedItem: null, searchResults: []});
       }
