@@ -35,4 +35,29 @@ export class SPHelpers {
     
         return formattedTime;
     }
+
+    // public formatDateToTimeString(date: Date): string {
+    //     const hours = date.getHours().toString().padStart(2, '0');
+    //     const minutes = date.getMinutes().toString().padStart(2, '0');
+    //     return `${hours}:${minutes}`;
+    //   }
+    public convertLocalToGMT(localDate: Date): Date {
+        // Get the time in milliseconds since January 1, 1970, 00:00:00 UTC
+        const utcMilliseconds = localDate.getTime() - (localDate.getTimezoneOffset() * 60000);
+        
+        // Create a new Date object using the UTC milliseconds
+        const gmtDate = new Date(utcMilliseconds);
+        
+        return gmtDate;
+    }
+
+    public setDateWithSelectedTime(date: Date, timeString: string): Date {
+        // Split the time string into hours and minutes
+        const [hours, minutes] = timeString.split(':').map(Number);
+    
+        // Set the hours and minutes on the date object
+        date.setHours(hours, minutes, 0, 0); // Setting seconds and milliseconds to 0
+    
+        return date;
+    }
 }

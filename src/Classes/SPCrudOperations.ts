@@ -117,7 +117,7 @@ import { FieldTypeKind } from '../Enums/enums';
   }
 
   // Insert item List
-  public async _insertItem(item: ISPItem): Promise<void> {
+  public async _insertItem(item: any): Promise<void> {
         const url: string = `${this.siteUrl}/_api/web/lists/getByTitle('${this.listName}')/items`;
         const spHttpClientOptions: ISPHttpClientOptions = {
                 body: JSON.stringify(item)
@@ -349,5 +349,36 @@ import { FieldTypeKind } from '../Enums/enums';
       console.error('Error getting site users', ex);
       return undefined;
     }
+  }
+
+  // Update Choices Field within a list 
+  public async _updateChoicesField(fieldColumnName: string, itemId: string , item: any): Promise<SPHttpClientResponse>{
+    const url: string = `${this.siteUrl}/_api/web/lists/getbytitle('${this.listName}')/fields/getbytitle(${fieldColumnName})`;
+    const spHttpClientOptions: ISPHttpClientOptions = {
+      headers: {
+        'Accept':'application/json;odata=verbose',
+        "Content-Type": "application/json;odata=verbose",
+        "X-RequestDigest": "<form_digest_value>",
+        'X-HTTP-Method': 'MERGE',
+        'IF-MATCH': '*'
+      },
+      body: JSON.stringify(item)
+    };
+    try {
+      const response: SPHttpClientResponse = await this.spHttpClient.post(url,
+        SPHttpClient.configurations.v1, spHttpClientOptions);
+        if (response.ok) {
+          console.log('Item updated successfully');
+          return response;
+        } else {
+          const errorResponse: any = await response.json();
+          console.error(`Error updating item. Status: ${response.status}`, errorResponse);
+          throw new Error(`Error updating item. Status: ${response.status}`);
+        }
+      } 
+      catch (error) {
+        console.error('Error updating item:', error);
+        throw error;
+      }
   }
 }

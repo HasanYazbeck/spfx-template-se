@@ -22,6 +22,7 @@
   "externals": {},
   "localizedResources": {
     "SpfxWebPartStrings": "lib/webparts/spfx/loc/{locale}.js",
-    "CalenderEventsSeWebPartStrings": "lib/webparts/calenderEventsSe/loc/{locale}.js"
+    "CalenderEventsSeWebPartStrings": "lib/webparts/calenderEventsSe/loc/{locale}.js",
+    "ControlStrings": "node_modules/@pnp/spfx-controls-react/lib/loc/{locale}.js"
   }
 }

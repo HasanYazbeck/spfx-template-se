@@ -29,11 +29,13 @@ export interface IEvent {
   GUID?: Guid | undefined;
   Title: string;
   Description?: string;
-  EventDate?: Date;
-  EndDate?: Date;
+  EventDate?: Date | undefined;
+  EndDate?: Date | undefined;
   Location?: string;
   Category?: Category [];
+  IsCategory?: boolean;
   OtherCategory?: string;
+  IsOtherCategory?: boolean;
   IsCompleted?: boolean;
   Participants?: [{Id: number , Name: string}];
   fAllDayEvent?: boolean | undefined;

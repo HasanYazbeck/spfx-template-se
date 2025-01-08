@@ -3,10 +3,12 @@ import { ICalenderEventsSeProps , ICalenderEventsSeState , IEvent} from './ICale
 import styles from './CalenderEventsSe.module.scss';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { SPCrudOperations } from '../../../Classes/SPCrudOperations';
-import { IPropertyPaneConfiguration, PropertyPaneCheckbox, PropertyPaneTextField } from '@microsoft/sp-webpart-base';
+import { DateTimePicker, DateConvention, TimeConvention } from '@pnp/spfx-controls-react/lib/DateTimePicker';
+import { SPHelpers } from '../../../Classes/SPHelpers';
 
 export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICalenderEventsSeState> {
   private spCrudOperation : SPCrudOperations ;
+  private spHelpers: SPHelpers = new SPHelpers();
   private timeInterval: number | undefined;
 
   state: ICalenderEventsSeState = {
@@ -17,7 +19,7 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
     selectedDate: new Date(),
     currentTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit'}),
     showModal: false,
-    newEvent: {Id: 0 , Title:''}
+    newEvent: {Id: 0 , Title:'', EventDate: undefined,endDate:undefined , IsCategory:true , IsOtherCategory: false}
   }
 
   constructor(props: ICalenderEventsSeProps) {
@@ -49,6 +51,8 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
   private getDaysInMonth = (year: number, month: number): number => {
     return new Date(year, month + 1, 0).getDate();
   };
+
+  // ***************************** JSX Elements ***********************************
 
   private CalendarDays = (): JSX.Element => {
     const year = this.state.currentDate.getFullYear();
@@ -111,7 +115,7 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
       <div className={styles.eventsList}>
         {currentPageEvents.map((event, index) => (
           <div key={index} className={`${styles.eventItem} ${event.IsCompleted ? styles.completed : ''}`}>
-            <div className={styles.eventCheckbox} onClick={() => this.handleEventCompletion(event)} role=''>
+            <div className={styles.eventCheckbox} onClick={() => this.EventCompletion(event)} role=''>
               {event.IsCompleted ? '✓' : '○'}
             </div>
             <div className={styles.eventDetails}>
@@ -133,7 +137,180 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
     );
   };
 
-  // Handle onClick Events functions
+  private Pagination = (): JSX.Element => {
+    const totalPages = this.getTotalPages();
+  
+    const pageNumbers = [];
+    for (let i = 1; i <= totalPages; i++) {
+      pageNumbers.push(i);
+    }
+
+    if(pageNumbers.length > 0){
+      return (
+        <div className={styles.pagination}>
+          <button className={styles.prev} onClick={this.handlePrevPage} disabled={this.state.currentPage === 1}>❮</button>
+          {pageNumbers.map(page => (
+            <span key={page} 
+              className={`${styles.pageNumber} ${this.state.currentPage === page ? styles.active : ''}`}
+              onClick={() => this.handlePageClick(page)} role=''>
+              {page}
+            </span>
+          ))}
+          <button className={styles.next} onClick={this.handleNextPage}
+          disabled={this.state.currentPage === totalPages} role=''>❯</button>
+        </div>
+      );
+    }
+    else {
+      return null;
+    }
+  };
+
+  private EventModal = (): JSX.Element => {
+    return(
+          <div className={`modal show ${styles.modal} ${styles.show}`} style={{ display: 'block'}} aria-modal='true'>
+              <div className='modal-dialog'>
+                <div className='modal-content'>
+                  <div className={`modal-header ${styles.modalHeaderCustomPadding} `}>
+                    <h5 className='modal-title'>Add New Event</h5>
+                    <button type='button' className={`${styles.close}`} data-dismiss='modal' aria-label='Close' onClick={this.toggleModal}>
+                      <span aria-hidden='true'>&times;</span>
+                    </button>
+                  </div>
+                  <div className='modal-body'>
+                    <form>
+                    <div className='container'>
+                      <div className='row mb-1 align-items-center'>
+                        <div className='col-md-3'>
+                          <label className='form-label'>Title</label>
+                        </div>
+                        <div className='col-md-9'>
+                            <input type='text' className='form-control'
+                              placeholder='Enter event title' value={this.state.newEvent.Title}
+                              onChange={(e) => this.handleInputChange(e, 'Title')}/>
+                        </div>
+                      </div>
+
+                      <div className='row mb-1 align-items-center'>
+                        <div className='col-md-3'>
+                          <label className='form-label'>Location</label>
+                        </div>
+                        <div className='col-md-9'>
+                            <input type='text' className='form-control'
+                              placeholder='Enter event location' value={this.state.newEvent.Location}
+                              onChange={(e) => this.handleInputChange(e, 'Location')}/>
+                        </div>
+                      </div>
+
+                      <div className='row mb-1 align-items-center'>
+                        <div className='col-md-3'>
+                          <label className='form-label'>Start Time</label>
+                        </div>
+                        <div className='col-md-5'>
+                          <input type='time' value={this.state.newEvent.startTime} className='form-control'
+                                   onChange={(date) => this.handleInputChange(date, 'startTime')} step='600'/>
+                        </div>
+                      </div>
+
+                      <div className='row mb-1 align-items-center'>
+                        <div className='col-md-3'>
+                          <label className='form-label'>End Time</label>
+                        </div>
+                        <div className='col-md-5'>
+                          <input type='time' value={this.state.newEvent.endTime} className='form-control'
+                                   onChange={(date) => this.handleInputChange(date, 'endTime')} step='600'/>
+                        </div>
+                      </div>
+
+                      <div className='row mb-1'>
+                        <div className='col-md-3'>
+                          <label className='form-label'>Description</label>
+                        </div>
+                        <div className='col-md-9'>
+                            <textarea className='form-control'
+                              placeholder='Enter event description' value={this.state.newEvent.Description}
+                              onChange={(e) => this.handleInputChange(e, 'Description')} rows={2}/>
+                        </div>
+                      </div>
+
+                      <div className='row mb-1 align-items-center'>
+                        <div className='col-md-3'>
+                          <label className='form-label'>Category</label>
+                        </div>
+
+                        <div className='col-md-6'>
+                           <div className='d-flex align-items-center'>
+                           <input type='checkbox' className=' me-2'  style={{border:'1px solid'}}
+                                  checked={this.state.newEvent.IsCategory} 
+                                  onChange={(e) => this.handleCheckboxChange(e, 'IsCategory')}/>
+                            
+                              <select id='Category' className= {`${styles.formTextCustom} w-100`} disabled = {!this.state.newEvent.IsCategory}
+                                    onChange={(e) => this.handleCategoryChange(e)}>
+                                    <option value=''>Select a Category</option>
+                                    {this.props.categories.map(category => (
+                                        <option key={category.Id} value={category.Id}>
+                                            {category.Title}
+                                        </option>
+                                 ))}
+                             </select>
+                           </div>
+
+                           <div className='d-flex align-items-center'>
+                           <input type='checkbox' className=' me-2'  style={{border:'1px solid'}}
+                                  checked={this.state.newEvent.IsOtherCategory} 
+                                  onChange={(e) => this.handleCheckboxChange(e, 'IsOtherCategory')}/>
+                            
+                            <input type='text' className={`${styles.formTextCustom} w-100`} disabled = {!this.state.newEvent.IsOtherCategory}
+                              placeholder='Enter your Category' value={this.state.newEvent.OtherCategory}
+                              onChange={(e) => this.handleInputChange(e, 'OtherCategory')}/>
+
+                           </div>
+                        </div>
+                      </div>
+
+                      <div className='row mb-1 align-items-center'>
+                        <div className='col-md-3'>
+                          <label className='form-label'>All Day Event</label>
+                        </div>
+                        <div className='col-md-1'>
+                          <input type='checkbox' className='' style={{border:'1px solid'}}
+                                checked={this.state.newEvent.fAllDayEvent} 
+                                onChange={(e) => this.handleCheckboxChange(e, 'fAllDayEvent')}/>
+                        </div>
+                        <div className='col-md-7'>
+                        <label className='form-check-label'>Make this an all-day activity that doesn't start or end at a specific hour.</label>
+                        </div>
+                      </div>   
+
+                         <div className='row mb-1 align-items-center'>
+                        <div className='col-md-3'>
+                          <label className='form-label'>Recurrence</label>
+                        </div>
+                        <div className='col-md-1'>
+                          <input type='checkbox' className='' style={{border:'1px solid'}}
+                                checked={this.state.newEvent.fRecurrence} 
+                                onChange={(e) => this.handleCheckboxChange(e, 'fRecurrence')}/>
+                        </div>
+                        <div className='col-md-7'>
+                        <label className='form-check-label'>Make this a repeating event.</label>
+                        </div>
+                      </div>     
+                    </div>            
+                    </form>
+                  </div>
+                  <div className='modal-footer'>
+                    <button type='button' style={{backgroundColor:'#675645'}} className='btn btn-primary' 
+                      onClick={this.saveEvent}>Save Event</button>
+                  </div>
+                </div>
+              </div>
+          </div>
+    );
+  }
+
+  // *****************************End JSX Elements ***********************************
+
+  // ***************************** Handle onClick Events functions ********************
   private handlePrevMonth = () => {
     const currentMonth: Date  = this.state.currentDate; // Assuming `currentMonth` is part of your state
     const newDate: Date = new Date(currentMonth.toDateString());
@@ -171,31 +348,84 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
     this.setState({ currentPage: page });
   };
 
-  private handleEventCompletion = (event: IEvent) => {
+  // Handle input changes for text and date fields
+  private handleInputChange = (event: React.ChangeEvent<any>, field: string) => {
+    const value = event.target.type === 'checkbox' ? event.target.checked : event.target.value;
+    this.setState(prevState => ({
+      newEvent: {
+        ...prevState.newEvent,
+        [field]: value
+      }
+    }));
+  };
 
-    this.setState(prevState => {
-      const updatedEvents = prevState.events.map(obj => {
-        // Check if the current event's ID matches the specificID
-        if (obj.Id === event.Id) {
-            // Toggle the IsCompleted property
-            const updatedObj =  {
-                ...obj,
-                IsCompleted: !obj.IsCompleted
-            };
+  // Handle changes for category selection
+  private handleCategoryChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedCategory = this.props.categories.filter(category => category.Id === event.target.value);
+    this.setState(prevState => ({
+      newEvent: {
+        ...prevState.newEvent,
+        Category: selectedCategory || { Id: '', Title: '' }
+      }
+    }));
+  };
 
-            this.spCrudOperation = new SPCrudOperations(this.props.context.spHttpClient, this.props.context.pageContext.web.absoluteUrl, 'Events','');
-            const item: any = { Id: updatedObj.Id.toString, IsCompleted: updatedObj.IsCompleted};
-            this.spCrudOperation._updateItem(updatedObj.Id.toString(), item);
-            return updatedObj;
-          }
-        // If not the event we want, return it unchanged
-        return obj;
-    });
-      return { events: updatedEvents };
-    });
-  }
+  // Handle checkbox changes for recurrence and other boolean fields
+  private handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>, field: string) => {
+    const value = event.target.checked;
+    const emptyCategory = this.props.categories.filter(category => category.Id === '');
 
-  // *********************** End Handle On Clicks ******************************************
+    if(field === 'IsCategory'){
+      const dropdown = document.getElementById('Category') as HTMLSelectElement;
+    if (dropdown) {
+      // Clear the selected option
+      dropdown.selectedIndex = 0; // Or use dropdown.value = '' to reset
+    }
+      this.setState(prevState => ({ 
+        newEvent: {
+          ...prevState.newEvent,
+          IsOtherCategory : !value,
+          IsCategory: value,
+          OtherCategory: '',
+          Category: emptyCategory || { Id: '', Title: '' },
+        }
+      }));
+    } else if(field === 'IsOtherCategory'){
+      const dropdown = document.getElementById('Category') as HTMLSelectElement;
+      if (dropdown) {
+        // Clear the selected option
+        dropdown.selectedIndex = 0; // Or use dropdown.value = '' to reset
+      }
+      this.setState(prevState => ({ 
+        newEvent: {
+          ...prevState.newEvent,
+          IsCategory : !value,
+          IsOtherCategory: value,
+          Category: emptyCategory || { Id: '', Title: '' },
+        }
+      }));
+    }
+    else {
+      this.setState(prevState => ({
+        newEvent: {
+          ...prevState.newEvent,
+          [field]: value
+        }
+      }));
+    }
+  };
+
+   // Handle input changes for text and date fields
+   private handleDateChange = (date: Date, field: string) => {
+    this.setState(prevState => ({
+      newEvent: {
+        ...prevState.newEvent,
+        [field]: date
+      }
+    }));
+  };
+
+  // ***************************** End Handle onClick Events functions ********************
 
   private getTotalPages = (): number => {
     const { eventsPerPage, selectedDate, events } = this.state;
@@ -229,161 +459,81 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
   const startIndex = (currentPage - 1) * eventsPerPage;
     return filteredEvents.slice(startIndex, startIndex + eventsPerPage);
   };
-  
-  private Pagination = (): JSX.Element => {
-    const totalPages = this.getTotalPages();
-  
-    const pageNumbers = [];
-    for (let i = 1; i <= totalPages; i++) {
-      pageNumbers.push(i);
-    }
-
-    if(pageNumbers.length > 0){
-      return (
-        <div className={styles.pagination}>
-          <button className={styles.prev} onClick={this.handlePrevPage} disabled={this.state.currentPage === 1}>❮</button>
-          {pageNumbers.map(page => (
-            <span key={page} 
-              className={`${styles.pageNumber} ${this.state.currentPage === page ? styles.active : ''}`}
-              onClick={() => this.handlePageClick(page)} role=''>
-              {page}
-            </span>
-          ))}
-          <button className={styles.next} onClick={this.handleNextPage}
-          disabled={this.state.currentPage === totalPages} role=''>❯</button>
-        </div>
-      );
-    }
-    else {
-      return null;
-    }
-  };
-
-  private newEventModal = (): JSX.Element => {
-    return(
-          <div className={`modal show ${styles.modal} ${styles.show}`} style={{ display: 'block', position: 'absolute' }} aria-modal='true'>
-              <div className='modal-dialog'>
-                <div className='modal-content'>
-                  <div className='modal-header'>
-                    <h5 className='modal-title'>Add New Event</h5>
-                    <button type='button' className={`${styles.close}`} data-dismiss='modal' aria-label='Close' onClick={this.toggleModal}>
-                      <span aria-hidden='true'>&times;</span>
-                    </button>
-                  </div>
-                  <div className='modal-body'>
-                    <form>
-                    <div className='container'>
-                      <div className={`row 'mb-1`}>
-                         <div className='col-md'>
-                          <label className='form-label'>Title</label>
-                          <input type='text' className='form-control' value='' placeholder='Enter event title'/>
-                         </div>
-
-                          <div className='col-md'>
-                              <label className='form-label'>Location</label>
-                              <input type='text' className='form-control' value='' placeholder='Enter event location'/>
-                         </div>
-
-                      </div>
-
-                      <div className={`row 'mb-1`}>
-                         <div className='col-md'>
-                            <label className='form-label'>Description</label>
-                            <textarea className='form-control' value={this.state.newEvent.Description} 
-                                      onChange={(e) => this.handleInputChange(e, 'Description')} 
-                                      placeholder='Enter event description'
-                                      rows={2}/>
-                         </div>
-
-                          <div className='col-md'>
-                            <label className='form-label'>Category</label>
-                            <select className='form-select' 
-                               onChange={(e) => this.handleCategoryChange(e)}>
-                               <option value=''>Select a Category</option>
-                               {this.props.categories.map(category => (
-                                   <option key={category.Id} value={category.Id}>
-                                       {category.Title}
-                                   </option>
-                               ))}
-                           </select>
-                         </div>
-                      </div>
-                  </div>
-
-                  <div className='form-check mb-2'>
-                    <input type='checkbox' className='form-check-input' style={{border:'1px solid'}}
-                                checked={this.state.newEvent.fAllDayEvent} 
-                                onChange={(e) => this.handleCheckboxChange(e, 'fAllDayEvent')}/>
-                        <label className='form-check-label'>All Day Event</label>
-                      </div>
-
-                      <div className='form-check mb-2'>
-                        <input type='checkbox' className='form-check-input' style={{border:'1px solid'}}
-                               checked={this.state.newEvent.fRecurrence} 
-                                onChange={(e) => this.handleCheckboxChange(e, 'fRecurrence')} />
-                          <label className='form-check-label'>Recurrence</label>
-                      </div>                 
-                    </form>
-                  </div>
-                  <div className='modal-footer'>
-                    <button type='button' style={{backgroundColor:'#675645'}} className='btn btn-primary' 
-                      onClick={this.saveEvent}>Save Event</button>
-                  </div>
-                </div>
-              </div>
-          </div>
-    );
-  }
 
   // Toggle modal visibility
-private toggleModal = () => {
-  this.setState((prevState) => ({
-    showModal: !prevState.showModal,
-    newEvent: { ...prevState.newEvent, Title: '', Location: '', StartTime: new Date(), EndTime: new Date(), Description: '', Category: { Id: '', Title: '' }, OtherCategory: '', Recurrence: false, IsCompleted: false }
-  }));
-};
+  private toggleModal = () => {
+    this.setState((prevState) => ({
+      showModal: !prevState.showModal,
+      newEvent: { ...prevState.newEvent, Title: '', Location: '', StartTime: new Date(), EndTime: new Date(), Description: '', Category: { Id: '', Title: '' }, OtherCategory: '', Recurrence: false, IsCompleted: false }
+    }));
+  };
 
-// Handle input changes for text and date fields
-private handleInputChange = (event: React.ChangeEvent<any>, field: string) => {
-  const value = event.target.type === 'checkbox' ? event.target.checked : event.target.value;
-  this.setState(prevState => ({
-    newEvent: {
-      ...prevState.newEvent,
-      [field]: value
+// Event Completion Function, sets the field IsCompleted to true or false in SharePoint Events List.
+  private EventCompletion = (event: IEvent) => {
+
+    this.setState(prevState => {
+      const updatedEvents = prevState.events.map(obj => {
+        // Check if the current event's ID matches the specificID
+        if (obj.Id === event.Id) {
+            // Toggle the IsCompleted property
+            const updatedObj =  {
+                ...obj,
+                IsCompleted: !obj.IsCompleted
+            };
+
+            this.spCrudOperation = new SPCrudOperations(this.props.context.spHttpClient, this.props.context.pageContext.web.absoluteUrl, 'Events','');
+            const item: any = { Id: updatedObj.Id.toString, IsCompleted: updatedObj.IsCompleted};
+            this.spCrudOperation._updateItem(updatedObj.Id.toString(), item);
+            return updatedObj;
+          }
+        // If not the event we want, return it unchanged
+        return obj;
+    });
+      return { events: updatedEvents };
+    });
+  }
+
+  private formatDateForSharePoint(date: any) {
+    // Ensure the input is a JavaScript Date object
+    const isoString = new Date(date).toISOString();
+    
+    // Return the formatted date string in the required format
+    return isoString;
+  }
+
+ 
+
+  // Save the event (pseudo-function to save data)
+  private saveEvent = async () => {
+    const { newEvent } = this.state;
+    debugger;
+    const newStartDate: Date = this.spHelpers.setDateWithSelectedTime(new Date,newEvent.startTime);
+    const newEndDate: Date = this.spHelpers.setDateWithSelectedTime(new Date,newEvent.endTime);
+    
+    // const formatedEventDate = newEvent.startTime !== undefined ? this.convertLocalToGMT(newEvent.EventDate) : undefined;
+    // const formatedEndDate = newEvent.EventDate !== undefined ? this.formatDateForSharePoint(newEvent.EventDate) : undefined;
+
+    const item: any = {
+      Title: newEvent.Title,
+      Location: newEvent.Location,
+      Description: newEvent.Description,
+      Category: newEvent.Category,
+      
+      fAllDayEvent: newEvent.fAllDayEvent,
+      fRecurrence: newEvent.fRecurrence,
+      EventDate: this.spHelpers.convertLocalToGMT(newStartDate)  ,
+      EndDate: this.spHelpers.convertLocalToGMT(newEndDate)
+    };
+    try{
+      this.spCrudOperation = new SPCrudOperations(this.props.context.spHttpClient, this.props.context.pageContext.web.absoluteUrl, 'Events','');
+      await this.spCrudOperation._insertItem(item);
+      alert('Event added successfully!');
+      this.toggleModal(); // Close modal after saving
+    } catch (err) {
+      console.error(err);
     }
-  }));
-};
-
-// Handle changes for category selection
-private handleCategoryChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-  const selectedCategory = this.props.categories.filter(category => category.Id === event.target.value);
-  this.setState(prevState => ({
-    newEvent: {
-      ...prevState.newEvent,
-      Category: selectedCategory || { Id: '', Title: '' }
-    }
-  }));
-};
-
-// Handle checkbox changes for recurrence and other boolean fields
-private handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>, field: string) => {
-  const value = event.target.checked;
-  this.setState(prevState => ({
-    newEvent: {
-      ...prevState.newEvent,
-      [field]: value
-    }
-  }));
-};
-
-// Save the event (pseudo-function to save data)
-private saveEvent = () => {
-  alert('Coming Soon!')
-  // console.log(this.state.newEvent);
-  // Add logic to save the event to your data source or backend
-  this.toggleModal(); // Close modal after saving
-};
-
+  };
+  
 
   public render(): React.ReactElement<{}> {
     const now = new Date();
@@ -428,7 +578,7 @@ private saveEvent = () => {
           <button className={styles.addEventBtn}onClick={this.toggleModal} >+</button>
         </div>
       </div>
-      {this.state.showModal && <this.newEventModal/>}
+      {this.state.showModal && <this.EventModal/>}
     </div>
   );
   }

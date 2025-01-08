@@ -356,3 +356,12 @@
 .modal.show {
   opacity: 1;
 }
+
+.formTextCustom {
+  margin-top: .25rem;
+  color: var(--bs-secondary-color);
+}
+
+.modalHeaderCustomPadding{
+  padding: 8px 0px 0px 12px !important;
+}
