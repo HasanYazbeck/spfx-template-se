@@ -1,15 +1,9 @@
 import * as React from 'react';
 import * as ReactDom from 'react-dom';
 import {
-  BaseClientSideWebPart,
-  IPropertyPaneConfiguration,
-  PropertyPaneButton,
-  PropertyPaneCheckbox,
-  PropertyPaneTextField,
-  PropertyPaneDropdown
+  BaseClientSideWebPart
 } from '@microsoft/sp-webpart-base';
-import * as strings from 'CalenderEventsSeWebPartStrings';
-import { ICalenderEventsSeProps, ICalenderEventsSeState, IEvent} from './components/ICalenderEventsSeProps';
+import { ICalenderEventsSeProps, IEvent} from './components/ICalenderEventsSeProps';
 import {CalenderEventsSe} from './components/CalenderEventsSe';
 import { SPCrudOperations } from '../../Classes/SPCrudOperations';
 import { SPHelpers } from '../../Classes/SPHelpers';
@@ -26,7 +20,6 @@ export default class CalenderEventsSeWebPart extends BaseClientSideWebPart<ICale
       CalenderEventsSe,
       {
         description: this.properties.description,
-        events: await this.GetEvents(),
         context: this.context,
         categories: [
           { Id:'Meeting' , Title: 'Meeting'},
@@ -126,49 +119,49 @@ export default class CalenderEventsSeWebPart extends BaseClientSideWebPart<ICale
   //   };
   // }
 
-  private async GetEvents(): Promise<IEvent []> {
+  // private async GetEvents(): Promise<IEvent []> {
     
-    try {
-      const query: string ='';
-      let result: IEvent [] = [];
-      this.spCrudOperation = new SPCrudOperations(this.context.spHttpClient, this.context.pageContext.web.absoluteUrl,'Events',query);
-      const reponse =  await this.spCrudOperation._getItems();
+  //   try {
+  //     const query: string ='';
+  //     let result: IEvent [] = [];
+  //     this.spCrudOperation = new SPCrudOperations(this.context.spHttpClient, this.context.pageContext.web.absoluteUrl,'Events',query);
+  //     const reponse =  await this.spCrudOperation._getItems();
     
-      if(reponse !== undefined && reponse.length > 0){
-       reponse.map(item => {
-          let temp: IEvent = {Id:0, Title:''};
-          temp.GUID = item['GUID'] !== undefined ? item['GUID']: undefined;
-          temp.Id = item['Id'] !== undefined ? item['Id'] : 0;
-          temp.Title = item['Title'] !== undefined ? item['Title'] : '';
-          temp.IsCompleted = item['IsCompleted'] !== undefined ? item['IsCompleted'] : undefined;
-          temp.Category =item['Category'] !== undefined ? item['Category'] : '';
-          temp.Location = item['Location'] !== undefined ? item['Location'] : '';
-          temp.Description = item['Description'] !== undefined ? item['Description'] : '';
-          temp.fAllDayEvent = item['fAllDayEvent'] !== undefined ? item['fAllDayEvent'] : undefined;
-          temp.fRecurrence = item['fRecurrence'] !== undefined ? item['fRecurrence'] : undefined;
-          if (item['EventDate'] !== undefined) {
-            temp.startTime = this.spHelpers.convertGMTToLocalTime12Hour(item['EventDate']);
-            temp.startDate = new Date(item['EventDate']);
-          } else {
-            temp.startTime = '';
-            temp.startDate = new Date(2024, 10, 29); // Default fallback date
-          }
+  //     if(reponse !== undefined && reponse.length > 0){
+  //      reponse.map(item => {
+  //         let temp: IEvent = {Id:0, Title:''};
+  //         temp.GUID = item['GUID'] !== undefined ? item['GUID']: undefined;
+  //         temp.Id = item['Id'] !== undefined ? item['Id'] : 0;
+  //         temp.Title = item['Title'] !== undefined ? item['Title'] : '';
+  //         temp.IsCompleted = item['IsCompleted'] !== undefined ? item['IsCompleted'] : undefined;
+  //         temp.Category =item['Category'] !== undefined ? item['Category'] : '';
+  //         temp.Location = item['Location'] !== undefined ? item['Location'] : '';
+  //         temp.Description = item['Description'] !== undefined ? item['Description'] : '';
+  //         temp.fAllDayEvent = item['fAllDayEvent'] !== undefined ? item['fAllDayEvent'] : undefined;
+  //         temp.fRecurrence = item['fRecurrence'] !== undefined ? item['fRecurrence'] : undefined;
+  //         if (item['EventDate'] !== undefined) {
+  //           temp.StartTime = this.spHelpers.convertGMTToLocalTime12Hour(item['EventDate']);
+  //           temp.startDate = new Date(item['EventDate']);
+  //         } else {
+  //           temp.StartTime = '';
+  //           temp.startDate = new Date(2024, 10, 29); // Default fallback date
+  //         }
 
-          if(item['EndDate'] !== undefined) {
-            temp.endTime = this.spHelpers.convertGMTToLocalTime12Hour(item['EndDate']);
-            temp.endDate = new Date(item['EndDate']);
-          } else {
-            temp.endTime = '';
-            temp.endDate = new Date(2024, 10, 29); // Default fallback date
-          }
+  //         if(item['EndDate'] !== undefined) {
+  //           temp.EndTime = this.spHelpers.convertGMTToLocalTime12Hour(item['EndDate']);
+  //           temp.endDate = new Date(item['EndDate']);
+  //         } else {
+  //           temp.EndTime = '';
+  //           temp.endDate = new Date(2024, 10, 29); // Default fallback date
+  //         }
 
-          result.push(temp);
-        });
-        };
-     return result;
-    }
-    catch (err) {
-      console.log(err);
-    } 
-  }
+  //         result.push(temp);
+  //       });
+  //       };
+  //    return result;
+  //   }
+  //   catch (err) {
+  //     console.log(err);
+  //   } 
+  // }
 }

@@ -4,6 +4,8 @@ export interface ISearchBarProps<T> {
     searchResults: T[];
     itemTitle: string;
     keyId: string;
+    className?: string | undefined;
+    placeholder?: string
 }
 
 export interface ISearchBarState<T>{

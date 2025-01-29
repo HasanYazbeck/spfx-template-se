@@ -1,9 +1,9 @@
 export interface IUser {
-    Id: number;
+    ID: number | string;
     Title: string;
     Email: string;
     LoginName: string;
-    IsSiteAdmin: boolean;
+    IsSiteAdmin?: boolean;
     IsEmailAuthenticationGuestUser?: boolean;
     IsHiddenInUI?: boolean;
     IsShareByEmailGuestUser?: boolean;

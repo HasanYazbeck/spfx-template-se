@@ -24,7 +24,7 @@ export class SPHelpers {
         const minutes = date.getMinutes();
         const seconds = date.getSeconds();
         // Determine AM or PM
-        const ampm = hours >= 12 ? 'AM' : 'PM';
+        const ampm = hours >= 12 ? 'PM' : 'AM';
         // Convert to 12-hour format
         hours = hours % 12;
         if (hours === 0) {

@@ -3,36 +3,42 @@ import { ICalenderEventsSeProps , ICalenderEventsSeState , IEvent} from './ICale
 import styles from './CalenderEventsSe.module.scss';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { SPCrudOperations } from '../../../Classes/SPCrudOperations';
-import { DateTimePicker, DateConvention, TimeConvention } from '@pnp/spfx-controls-react/lib/DateTimePicker';
 import { SPHelpers } from '../../../Classes/SPHelpers';
+import CalenderEventsSeWebPart from '../CalenderEventsSeWebPart';
+import { ICommon, ISite } from '../../../Interfaces/ICommon';
 
 export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICalenderEventsSeState> {
   private spCrudOperation : SPCrudOperations ;
   private spHelpers: SPHelpers = new SPHelpers();
   private timeInterval: number | undefined;
-
+  private loggedInUsername : string = this.props.context.pageContext.user.displayName;
   state: ICalenderEventsSeState = {
     events: [],
+    sites:[],
     currentDate: new Date(),
     currentPage : 1,
     eventsPerPage: 3,
     selectedDate: new Date(),
     currentTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit'}),
     showModal: false,
-    newEvent: {Id: 0 , Title:'', EventDate: undefined,endDate:undefined , IsCategory:true , IsOtherCategory: false}
+    IsTimeEarlier: false,
+    newEvent: {Id: 0 , Title:'', EventDate: undefined,endDate:undefined , IsCategory:true , IsOtherCategory: false,StartTime: '',  // Initialize StartTime
+    EndTime: '' },
+    isLoading: false,
   }
 
   constructor(props: ICalenderEventsSeProps) {
     super(props);
   }
   
-  componentDidMount(): void {
-   
-    this.loadEvents();
+  componentDidMount(): void { 
+    
+    this.loadWebPartLists();
      // Update the time every second
-     this.timeInterval = window.setInterval(() => {
+     this.timeInterval = window.setInterval( () => {
       this.setState({
-        currentTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        currentTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        
       });
     }, 1000);
   }
@@ -44,8 +50,10 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
     }
   }
 
-   private loadEvents = async (): Promise<void> => {
-    this.setState({events: this.props.events });
+   private loadWebPartLists = async (): Promise<void> => {
+    const events: IEvent[] =  await this.GetEvents();
+    const sites: ISite[] = await this.GetSites();
+     this.setState({events: events , sites: sites});
   };
 
   private getDaysInMonth = (year: number, month: number): number => {
@@ -123,10 +131,10 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
               <span className={styles.eventTime}>{event.fAllDayEvent? 'all-day' : 
               (<div>
                 <div>
-                  Starts @ {event.startTime}
+                  Starts @ {event.StartTime}
                 </div> 
                 <div>
-                  Ends @ {event.endTime}
+                  Ends @ {event.EndTime}
                 </div>
               </div>)
               }</span>
@@ -169,10 +177,10 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
   private EventModal = (): JSX.Element => {
     return(
           <div className={`modal show ${styles.modal} ${styles.show}`} style={{ display: 'block'}} aria-modal='true'>
-              <div className='modal-dialog'>
+              <div className='modal-dialog modal-dialog-centered modal-lg'>
                 <div className='modal-content'>
                   <div className={`modal-header ${styles.modalHeaderCustomPadding} `}>
-                    <h5 className='modal-title'>Add New Event</h5>
+                    <h5 className='modal-title'>Add Mission</h5>
                     <button type='button' className={`${styles.close}`} data-dismiss='modal' aria-label='Close' onClick={this.toggleModal}>
                       <span aria-hidden='true'>&times;</span>
                     </button>
@@ -192,6 +200,23 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
                       </div>
 
                       <div className='row mb-1 align-items-center'>
+                      <div className='col-md-3'>
+                          <label className='form-label'>Site</label>
+                        </div>
+                        <div className='col-md-9'>
+                              <select id='Site' className= {`form-select ${styles.formTextCustom} w-100`}
+                                    onChange={(e) => this.handleSiteChange(e)}>
+                                    <option value=''>Select Site</option>
+                                    {this.state.sites.map(item => (
+                                        <option key={item.Id} value={item.Id}>
+                                            {item.Title}
+                                        </option>
+                                 ))}
+                             </select>
+                             </div>
+                        </div>
+                      
+                      <div className='row mb-1 align-items-center'>
                         <div className='col-md-3'>
                           <label className='form-label'>Location</label>
                         </div>
@@ -207,8 +232,11 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
                           <label className='form-label'>Start Time</label>
                         </div>
                         <div className='col-md-5'>
-                          <input type='time' value={this.state.newEvent.startTime} className='form-control'
-                                   onChange={(date) => this.handleInputChange(date, 'startTime')} step='600'/>
+                          <input type='time' className='form-control' style={{ 
+                                borderColor: this.state.IsTimeEarlier ? 'red' : '',
+                                backgroundColor: this.state.IsTimeEarlier ? '#fff0f0' : ''}}
+                                value={this.state.newEvent.StartTime || ''}
+                                onChange={(date) => this.handleDateChange(date, 'StartTime')} step='600'/>
                         </div>
                       </div>
 
@@ -217,8 +245,13 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
                           <label className='form-label'>End Time</label>
                         </div>
                         <div className='col-md-5'>
-                          <input type='time' value={this.state.newEvent.endTime} className='form-control'
-                                   onChange={(date) => this.handleInputChange(date, 'endTime')} step='600'/>
+                          <input type='time' value={this.state.newEvent.EndTime || ''}
+                                 style={{ 
+                                  borderColor: this.state.IsTimeEarlier ? 'red' : '',
+                                  backgroundColor: this.state.IsTimeEarlier ? '#fff0f0' : ''}}
+                                 className='form-control'
+                                 onChange={(date) => this.handleDateChange(date, 'EndTime')} step='600'/>
+                          {this.state.IsTimeEarlier && (<small className='text-danger'>End Time must be later than Start Time</small>)}
                         </div>
                       </div>
 
@@ -239,12 +272,11 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
                         </div>
 
                         <div className='col-md-6'>
-                           <div className='d-flex align-items-center'>
+                           <div className='d-flex align-items-center mb-2'>
                            <input type='checkbox' className=' me-2'  style={{border:'1px solid'}}
                                   checked={this.state.newEvent.IsCategory} 
                                   onChange={(e) => this.handleCheckboxChange(e, 'IsCategory')}/>
-                            
-                              <select id='Category' className= {`${styles.formTextCustom} w-100`} disabled = {!this.state.newEvent.IsCategory}
+                              <select id='Category' className= {`form-select ${styles.formTextCustom} w-100`} disabled = {!this.state.newEvent.IsCategory}
                                     onChange={(e) => this.handleCategoryChange(e)}>
                                     <option value=''>Select a Category</option>
                                     {this.props.categories.map(category => (
@@ -260,15 +292,14 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
                                   checked={this.state.newEvent.IsOtherCategory} 
                                   onChange={(e) => this.handleCheckboxChange(e, 'IsOtherCategory')}/>
                             
-                            <input type='text' className={`${styles.formTextCustom} w-100`} disabled = {!this.state.newEvent.IsOtherCategory}
+                            <input type='text' className={`form-control ${styles.formTextCustom} w-100`} disabled = {!this.state.newEvent.IsOtherCategory}
                               placeholder='Enter your Category' value={this.state.newEvent.OtherCategory}
                               onChange={(e) => this.handleInputChange(e, 'OtherCategory')}/>
-
                            </div>
                         </div>
                       </div>
 
-                      <div className='row mb-1 align-items-center'>
+                      <div className='row mb-1 align-items-center mt-2'>
                         <div className='col-md-3'>
                           <label className='form-label'>All Day Event</label>
                         </div>
@@ -280,9 +311,8 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
                         <div className='col-md-7'>
                         <label className='form-check-label'>Make this an all-day activity that doesn't start or end at a specific hour.</label>
                         </div>
-                      </div>   
-
-                         <div className='row mb-1 align-items-center'>
+                      </div>  
+                      {/* <div className='row mb-1 align-items-center'>
                         <div className='col-md-3'>
                           <label className='form-label'>Recurrence</label>
                         </div>
@@ -294,13 +324,13 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
                         <div className='col-md-7'>
                         <label className='form-check-label'>Make this a repeating event.</label>
                         </div>
-                      </div>     
+                      </div>  */} 
                     </div>            
                     </form>
                   </div>
                   <div className='modal-footer'>
                     <button type='button' style={{backgroundColor:'#675645'}} className='btn btn-primary' 
-                      onClick={this.saveEvent}>Save Event</button>
+                      onClick={this.handleAddRemark}>Save Event</button>
                   </div>
                 </div>
               </div>
@@ -362,6 +392,7 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
   // Handle changes for category selection
   private handleCategoryChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedCategory = this.props.categories.filter(category => category.Id === event.target.value);
+    
     this.setState(prevState => ({
       newEvent: {
         ...prevState.newEvent,
@@ -369,6 +400,20 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
       }
     }));
   };
+
+    // Handle changes for category selection
+    private handleSiteChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+      const selectedSite = this.state.sites.filter(site => site.Id!.toString() === event.target.value);
+      
+      this.setState(prevState => ({
+        newEvent: {
+          ...prevState.newEvent,
+          Site: selectedSite || { Id: '', Title: ''}
+          // Category: selectedCategory || { Id: '', Title: '' }
+        }
+      }));
+    };
+
 
   // Handle checkbox changes for recurrence and other boolean fields
   private handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>, field: string) => {
@@ -416,15 +461,82 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
   };
 
    // Handle input changes for text and date fields
-   private handleDateChange = (date: Date, field: string) => {
-    this.setState(prevState => ({
-      newEvent: {
-        ...prevState.newEvent,
-        [field]: date
-      }
-    }));
+   private handleDateChange = (date: React.ChangeEvent<HTMLInputElement>, field: string) => {
+    const value = date.target.value;
+    if(field === 'StartTime' || field === 'EndTime'){
+
+    const newStartTime = field === 'StartTime' ? value : this.state.newEvent.StartTime;
+    const newEndTime = field === 'EndTime' ? value : this.state.newEvent.EndTime;
+    const isTimeEarlier = newStartTime && newEndTime && newStartTime >= newEndTime;
+
+      this.setState(prevState => ({
+        newEvent: {
+          ...prevState.newEvent,
+          [field]: value
+        }, IsTimeEarlier:isTimeEarlier
+      }));
+    }
   };
 
+  private handleAddRemark = async (): Promise<void> => {
+    try {
+      
+      const { newEvent} = this.state;
+      const calendarDateSelected = this.state.selectedDate;
+      const startDate: Date = this.spHelpers.setDateWithSelectedTime(new Date(calendarDateSelected.toDateString()),newEvent.StartTime);
+      const endDate: Date = this.spHelpers.setDateWithSelectedTime(new Date(calendarDateSelected.toDateString()),newEvent.EndTime);
+      
+      let categoryValue = '';
+      if (newEvent.IsCategory && newEvent.Category.length > 0) {
+          categoryValue = newEvent.Category[0].Title || ''; // Use the selected category from dropdown
+      } else if (newEvent.IsOtherCategory && newEvent.OtherCategory) {
+          categoryValue = newEvent.OtherCategory; // Use the custom category input
+      }
+
+      const item: any = {
+        Title: newEvent.Title,
+        SiteId: newEvent.Site[0].Id,
+        // ParticipantsPicker: ,
+        Location: newEvent.Location,
+        Description: newEvent.Description,
+        Category: categoryValue,
+        fAllDayEvent: newEvent.fAllDayEvent,
+        // fRecurrence: newEvent.fRecurrence,
+        EventDate: startDate,
+        EndDate: endDate,
+        IsCompleted: false,
+      };
+  
+      await this.addEvent(item);
+      // Clear the form
+      this.setState({ newEvent: {
+            Id: 0,
+            Title: '',
+            Location: '',
+            Description: '',
+            Category: null,
+            StartTime: '',
+            EndTime: '',
+            fAllDayEvent: false,
+            fRecurrence: false,
+            IsCategory: false,
+            IsOtherCategory: false,
+            OtherCategory: ''
+        }
+    });
+  
+    // Close the modal
+    this.toggleModal();
+  
+      // Add a small delay before refreshing the events
+      setTimeout(() => {
+        this.loadWebPartLists();
+    }, 1000);
+
+    } catch (error) {
+      console.error('An error occurred while adding the event:', error);
+    }
+  }
   // ***************************** End Handle onClick Events functions ********************
 
   private getTotalPages = (): number => {
@@ -464,7 +576,16 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
   private toggleModal = () => {
     this.setState((prevState) => ({
       showModal: !prevState.showModal,
-      newEvent: { ...prevState.newEvent, Title: '', Location: '', StartTime: new Date(), EndTime: new Date(), Description: '', Category: { Id: '', Title: '' }, OtherCategory: '', Recurrence: false, IsCompleted: false }
+      newEvent: { ...prevState.newEvent, Title: '', 
+                                         Location: '', 
+                                         StartTime: '', 
+                                         EndTime: '', 
+                                         Description: '', 
+                                         Category: { Id: '', Title: '' }, 
+                                         OtherCategory: '', 
+                                         Recurrence: false, 
+                                         IsCompleted: false , 
+                                          }
     }));
   };
 
@@ -492,48 +613,15 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
       return { events: updatedEvents };
     });
   }
-
-  private formatDateForSharePoint(date: any) {
-    // Ensure the input is a JavaScript Date object
-    const isoString = new Date(date).toISOString();
-    
-    // Return the formatted date string in the required format
-    return isoString;
-  }
-
  
-
-  // Save the event (pseudo-function to save data)
-  private saveEvent = async () => {
-    const { newEvent } = this.state;
-    debugger;
-    const newStartDate: Date = this.spHelpers.setDateWithSelectedTime(new Date,newEvent.startTime);
-    const newEndDate: Date = this.spHelpers.setDateWithSelectedTime(new Date,newEvent.endTime);
-    
-    // const formatedEventDate = newEvent.startTime !== undefined ? this.convertLocalToGMT(newEvent.EventDate) : undefined;
-    // const formatedEndDate = newEvent.EventDate !== undefined ? this.formatDateForSharePoint(newEvent.EventDate) : undefined;
-
-    const item: any = {
-      Title: newEvent.Title,
-      Location: newEvent.Location,
-      Description: newEvent.Description,
-      Category: newEvent.Category,
-      
-      fAllDayEvent: newEvent.fAllDayEvent,
-      fRecurrence: newEvent.fRecurrence,
-      EventDate: this.spHelpers.convertLocalToGMT(newStartDate)  ,
-      EndDate: this.spHelpers.convertLocalToGMT(newEndDate)
-    };
-    try{
-      this.spCrudOperation = new SPCrudOperations(this.props.context.spHttpClient, this.props.context.pageContext.web.absoluteUrl, 'Events','');
-      await this.spCrudOperation._insertItem(item);
-      alert('Event added successfully!');
-      this.toggleModal(); // Close modal after saving
-    } catch (err) {
-      console.error(err);
+  async addEvent(event: IEvent): Promise<void> {
+    try {
+      this.spCrudOperation = new SPCrudOperations(this.props.context.spHttpClient,this.props.context.pageContext.web.absoluteUrl, 'Events', '');
+      await this.spCrudOperation._insertItem(event);
+    } catch (error) {
+    console.error('An error has occurred!', error);
     }
-  };
-  
+  }
 
   public render(): React.ReactElement<{}> {
     const now = new Date();
@@ -557,8 +645,7 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
             <button className={styles.messagesBtn}>Messages</button>
           </div>
         </div>
-        <this.EventsList />
-       
+        <this.EventsList/>
         <this.Pagination/>
       </div>
       
@@ -582,4 +669,97 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
     </div>
   );
   }
+
+  private async GetEvents(): Promise<IEvent []> {
+    try {
+      const query: string ='';
+      let result: IEvent [] = [];
+      this.spCrudOperation = new SPCrudOperations(this.props.context.spHttpClient, this.props.context.pageContext.web.absoluteUrl,'Events',query);
+      const reponse =  await this.spCrudOperation._getItems();
+    
+      if(reponse !== undefined && reponse.length > 0){
+       reponse.map(item => {
+          let temp: IEvent = {Id:0, Title:''};
+          temp.GUID = item['GUID'] !== undefined ? item['GUID']: undefined;
+          temp.Id = item['Id'] !== undefined ? item['Id'] : 0;
+          temp.Title = item['Title'] !== undefined ? item['Title'] : '';
+          temp.IsCompleted = item['IsCompleted'] !== undefined ? item['IsCompleted'] : undefined;
+          temp.Category =item['Category'] !== undefined ? item['Category'] : '';
+          temp.Location = item['Location'] !== undefined ? item['Location'] : '';
+          temp.Description = item['Description'] !== undefined ? item['Description'] : '';
+          temp.fAllDayEvent = item['fAllDayEvent'] !== undefined ? item['fAllDayEvent'] : undefined;
+          temp.fRecurrence = item['fRecurrence'] !== undefined ? item['fRecurrence'] : undefined;
+          if (item['EventDate'] !== undefined) {
+            temp.StartTime = this.spHelpers.convertGMTToLocalTime12Hour(item['EventDate']);
+            temp.startDate = new Date(item['EventDate']);
+          } else {
+            temp.StartTime = '';
+            temp.startDate = new Date(2024, 10, 29); // Default fallback date
+          }
+
+          if(item['EndDate'] !== undefined) {
+            temp.EndTime = this.spHelpers.convertGMTToLocalTime12Hour(item['EndDate']);
+            temp.endDate = new Date(item['EndDate']);
+          } else {
+            temp.EndTime = '';
+            temp.endDate = new Date(2024, 10, 29); // Default fallback date
+          }
+
+          result.push(temp);
+        });
+        };
+     return result;
+    }
+    catch (err) {
+      console.log(err);
+    } 
+  }
+
+  private async GetSites(): Promise<ISite []> {
+    try {
+      const query: string ='';
+      let result: ISite [] = [];
+      this.spCrudOperation = new SPCrudOperations(this.props.context.spHttpClient, this.props.context.pageContext.web.absoluteUrl,'Site',query);
+      const reponse =  await this.spCrudOperation._getItems();
+    
+      if(reponse !== undefined && reponse.length > 0){
+       reponse.map(item => {
+          const temp: ISite = {
+            Id : item['Id'] !== undefined ? item['Id'] : 0,
+            Title: item['Title'] !== undefined ? item['Title'] : '',
+            SiteType:''
+           }
+          result.push(temp);
+        });
+        };
+     return result;
+    }
+    catch (err) {
+      console.log(err);
+    } 
+  }
+
+  private async GetSitesTypes(): Promise<ICommon[]> {
+    try {
+      const query: string ='';
+      let result: ICommon [] = [];
+      this.spCrudOperation = new SPCrudOperations(this.props.context.spHttpClient, this.props.context.pageContext.web.absoluteUrl,'SiteType',query);
+      const reponse =  await this.spCrudOperation._getItems();
+    
+      if(reponse !== undefined && reponse.length > 0){
+       reponse.map(item => {
+          const temp: ICommon = {
+            Id : item['Id'] !== undefined ? item['Id'] : 0,
+            Title: item['Title'] !== undefined ? item['Title'] : '',
+           }
+          result.push(temp);
+        });
+        };
+     return result;
+    }
+    catch (err) {
+      console.log(err);
+    } 
+  }
+
 }

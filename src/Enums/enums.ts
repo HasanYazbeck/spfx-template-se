@@ -11,3 +11,10 @@ export enum FieldTypeKind {
     PersonOrGroup = 10,
     HyperlinkOrPicture = 11
   }
+
+  export enum UsefullNumberCategories {
+    Military = 'Military Centers',
+    Civilian = 'Civilian',
+    Soldiers = 'Soldiers Numbers',
+    map = "map"
+  }

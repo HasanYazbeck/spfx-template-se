@@ -1,0 +1,4 @@
+interface IFileUploadState {
+    files: File[];
+  }
+  

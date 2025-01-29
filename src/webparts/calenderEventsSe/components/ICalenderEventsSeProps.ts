@@ -1,15 +1,18 @@
 import { Guid } from "@microsoft/sp-core-library";
 import { WebPartContext } from "@microsoft/sp-webpart-base";
+import { ISite } from "../../../Interfaces/ICommon";
 
 export interface ICalenderEventsSeProps {
   description: string;
-  events: IEvent [];
+  // events: IEvent [];
   context: WebPartContext;
   categories: Category [];
+  
 }
 
 export interface ICalenderEventsSeState {
   events: IEvent[];
+  sites: ISite[];
   currentDate: Date;
   currentPage: number;  // Start on page 1
   eventsPerPage: number;
@@ -17,6 +20,8 @@ export interface ICalenderEventsSeState {
   currentTime: string;
   showModal?: boolean;
   newEvent?: IEvent;
+  IsTimeEarlier: boolean;
+  isLoading: boolean;
 }
 
 export interface Category {
@@ -26,6 +31,7 @@ export interface Category {
 
 export interface IEvent {
   Id: number;
+  Site?: {Id: string,Title: string};
   GUID?: Guid | undefined;
   Title: string;
   Description?: string;
@@ -37,13 +43,13 @@ export interface IEvent {
   OtherCategory?: string;
   IsOtherCategory?: boolean;
   IsCompleted?: boolean;
-  Participants?: [{Id: number , Name: string}];
+  ParticipantsPicker?: [{Id: number , Name: string}];
   fAllDayEvent?: boolean | undefined;
   fRecurrence?: boolean | undefined;
-  startDate?: Date | undefined, //new Date(2024, 11 - 1, 29)  November (Month 11, 11-1 = 10)
+  startDate?: Date | undefined,
   endDate?: Date | undefined,
-  startTime?: string | undefined; //'14:30',
-  endTime?: string | undefined;
+  StartTime?: string | undefined; //'14:30',
+  EndTime?: string | undefined;
   RecurrenceType?: string,
   RecurrencePattern?: string,
   // RecurrenceDateRange?: Recurrences

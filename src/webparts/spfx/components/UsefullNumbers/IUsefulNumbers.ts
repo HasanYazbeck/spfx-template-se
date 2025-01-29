@@ -1,4 +1,5 @@
 import { WebPartContext } from "@microsoft/sp-webpart-base";
+import { ICommon } from "../../../../Interfaces/ICommon";
 import "./UsefulNumbersDirectory.css";
 
 export interface PhoneNumber {
@@ -16,5 +17,7 @@ export interface IUsefullNumberProps {
 
 export interface IUsefullNumberState {
     searchResults: PhoneNumber[];
-    selectedItem: PhoneNumber;
+    selectedItem: any;
+    selectedCategory: ICommon;
+    categoryError: boolean,
 }

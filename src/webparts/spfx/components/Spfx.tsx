@@ -1,11 +1,16 @@
-import * as React from 'react';
+
 import styles from './Spfx.module.scss';
 import { ISpfxProps , ISpfxState} from './ISpfxProps';
 import 'bootstrap/dist/css/bootstrap.min.css';
 // import { BsAlarm } from "react-icons/bs";
 import TabsComponent from './TabsComponent/TabsComponent';
+import { ISite } from '../../../Interfaces/ICommon';
+import * as React from 'react';
+import { SPCrudOperations } from '../../../Classes/SPCrudOperations';;
 
-export default class Spfx extends React.Component < ISpfxProps, ISpfxState > {
+
+export default class Spfx extends React.Component <ISpfxProps, ISpfxState > {
+  private sites: ISite [] = [];
   constructor(props: ISpfxProps) {
     super(props);
     this.state = {

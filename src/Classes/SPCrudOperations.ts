@@ -119,13 +119,17 @@ import { FieldTypeKind } from '../Enums/enums';
   // Insert item List
   public async _insertItem(item: any): Promise<void> {
         const url: string = `${this.siteUrl}/_api/web/lists/getByTitle('${this.listName}')/items`;
+        console.log('Item to insert:', JSON.stringify(item));
         const spHttpClientOptions: ISPHttpClientOptions = {
-                body: JSON.stringify(item)
-                };
+          body: JSON.stringify(item),
+            headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+            }
+          };
 
         try {
-          const response: SPHttpClientResponse = await this.spHttpClient.post(url, SPHttpClient.configurations.v1,
-            spHttpClientOptions);
+          const response: SPHttpClientResponse = await this.spHttpClient.post(url, SPHttpClient.configurations.v1,spHttpClientOptions);
 
             if (response.status === 201) { // the item is created for response code 201
                 alert('A new Item inserted successfully.');
@@ -138,7 +142,6 @@ import { FieldTypeKind } from '../Enums/enums';
             console.error('Error creating item:', error);
             throw error;
         }
-        
   }
 
   // Get Items List
@@ -266,28 +269,85 @@ import { FieldTypeKind } from '../Enums/enums';
     }
   }
 
-  // Get User by name or email
-  public async _searchUsers(query: string): Promise<IUser> {
+  // Search Users by name or email
+  public async _getUserByTitleEmail(query: string): Promise<IUser> {
+    const url: string = `${this.siteUrl}/_api/web/siteusers?$filter=Title eq '${query}' or Email eq '${query}'`;
+    let result: IUser = undefined;
+    try{
+      const response: SPHttpClientResponse = await this.spHttpClient.get(url, SPHttpClient.configurations.v1);
+      if (response.ok) {
+        const itemsList = await response.json();
+
+        if (Object(itemsList.value)) {
+          itemsList.value.map((item: any) =>  {
+            const user: IUser = {
+              ID: item.Id,
+              Title: item.Title,
+              Email: item.Email,
+              LoginName: item.LoginName
+            }
+            result = user;
+          });
+          return result;
+      } else {
+          console.error('Expected an array, but got:', itemsList.value[0]);
+      }
+      } else {
+        const errorResponse: any = await response.json();
+        console.error(`Error Retreiving item. Status: ${response.status}`, errorResponse);
+        throw new Error(`Error Retreiving item. Status: ${response.status}`);
+      }
+    }
+    catch (error){
+      console.error('Error Retreiving Item', error);
+      throw error;
+    }
+}
+
+  // Search Users by name or email
+  public async _searchUsersByTitleEmail(query: string): Promise<IUser[]> {
       const url: string = `${this.siteUrl}/_api/web/siteusers?$filter=substringof('${query}',Title) or substringof('${query}',Email)`;
-
+      let result: IUser [] = [];
       try{
-        return this.spHttpClient.get(url, SPHttpClient.configurations.v1)
-        .then((response: SPHttpClientResponse) => {
-          return response.json();
-        })
-        .then((itemsList: any) => {
-          // const tempItem: any = itemsList.value[0];
+        const response: SPHttpClientResponse = await this.spHttpClient.get(url, SPHttpClient.configurations.v1);
+        if (response.ok) {
+          const itemsList = await response.json();
 
-          const users: IUser = itemsList.value[0].map((user: any) => ({
-            Id: user.Id,
-            Title: user.Title,
-            Email: user.Email,
-            LoginName: user.LoginName
-          }));
+          if (Array.isArray(itemsList.value)) {
+            itemsList.value.map((item: any) =>  {
+              const user: IUser = {
+                ID: item.Id,
+                Title: item.Title,
+                Email: item.Email,
+                LoginName: item.LoginName
+              }
+              result.push(user);
+            });
+            return result;
+        } else {
+            console.error('Expected an array, but got:', itemsList.value[0]);
+        }
+        } else {
+          const errorResponse: any = await response.json();
+          console.error(`Error Retreiving item. Status: ${response.status}`, errorResponse);
+          throw new Error(`Error Retreiving item. Status: ${response.status}`);
+        }
+        // return this.spHttpClient.get(url, SPHttpClient.configurations.v1)
+        // .then((response: SPHttpClientResponse) => {
+        //   return response.json();
+        // })
+        // .then((itemsList: any) => {
+        //   // const tempItem: any = itemsList.value[0];
 
-          const listItem: IUser = users;  // Cast as interface ISPItem
-          return listItem;
-        }) as Promise<IUser>;
+        //   const users: IUser = itemsList.value[0].map((user: any) => ({
+        //     Id: user.Id,
+        //     Title: user.Title,
+        //     Email: user.Email,
+        //     LoginName: user.LoginName
+        //   }));
+        //   const listItem: IUser = users;  // Cast as interface ISPItem
+        //   return listItem;
+        // }) as Promise<IUser>;
       }
       catch (error){
         console.error('Error Retreiving Item', error);
@@ -350,6 +410,8 @@ import { FieldTypeKind } from '../Enums/enums';
       return undefined;
     }
   }
+
+
 
   // Update Choices Field within a list 
   public async _updateChoicesField(fieldColumnName: string, itemId: string , item: any): Promise<SPHttpClientResponse>{
