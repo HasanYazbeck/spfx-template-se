@@ -1,5 +1,5 @@
 import * as React from 'react';
-import styles from '../../components/Spfx.module.scss';
+import styles from '../../Spfx.module.scss';
 
 export const Loader = (): JSX.Element => {
   return (

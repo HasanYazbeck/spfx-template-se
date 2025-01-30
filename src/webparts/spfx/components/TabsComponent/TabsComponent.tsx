@@ -19,7 +19,7 @@ import { SiteInfo } from '../SiteInfo/SiteInfo';
 import {UsefullNumbersDirectory} from '../UsefullNumbers/UsefulNumbersDirectory';
 import { Problems } from '../Problems/Problems';
 import { Reports } from '../Report/Report';
-import { Loader } from '../Common/Loader';
+import { Loader } from '../Common/Loader/Loader';
 
 export default class TabsComponent extends React.Component<ITabsComponentProps, ITabsComponentState> {
   private spCrudOperations: SPCrudOperations;
@@ -44,10 +44,10 @@ export default class TabsComponent extends React.Component<ITabsComponentProps, 
     Category: '',
     Region: ''
   };
-  private problem: Problem = {
-    Title: '',
-    SieName: ''
-  };
+  // private problem: Problem = {
+  //   Title: '',
+  //   SieName: ''
+  // };
   private report: Report = {
     Title: ''
   };
@@ -120,7 +120,7 @@ export default class TabsComponent extends React.Component<ITabsComponentProps, 
             </div>
             <div className={`tab-pane fade ${activeTab === 'problems-tab' ? 'show active' : ''}`}
             id='problems-tab-pane' role='tabpanel'>
-              <Problems context={this.props.context} problem={this.problem}  sites={this.state.sites} devices={this.state.devices} deviceCategories={this.state.deviceCategories} deviceTypes={this.state.deviceTypes}/>
+              <Problems context={this.props.context} problems={[]} sites={this.state.sites} devices={this.state.devices} deviceCategories={this.state.deviceCategories} deviceTypes={this.state.deviceTypes}/>
             </div>
             <div className={`tab-pane fade ${activeTab === 'report-tab' ? 'show active' : ''}`}
             id='report-tab-pane' role='tabpanel'>

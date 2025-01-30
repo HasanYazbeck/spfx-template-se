@@ -1,86 +1,59 @@
 import * as React from 'react';
+
+// Interfaces
 import {IProblemsProps , IProblemsState , Problem , Severity , FileWithPreview} from './IProblems';
-import { ISite , IDeviceCategory , IDeviceType } from '../../../../Interfaces/ICommon';
+
+// Classes
 import { SPCrudOperations } from '../../../../Classes/SPCrudOperations';
-import { SearchBar } from '../SearchBarComponent/SearchBar';
-import { FileUpload } from '../Common/FileUpload';
+
+// Components
+import { FileUpload } from '../Common/FileUpload/FileUpload';
+import { Grid } from '../Common/Grid/Grid';
+import { Modal } from '../Common/Modal/Modal';
+import { Loader } from '../Common/Loader/Loader';
+// import { SearchBar } from '../SearchBarComponent/SearchBar';
 
 export class Problems extends React.Component<IProblemsProps, IProblemsState> {
     private spCrudOperations: SPCrudOperations;
     private fileInputRef: HTMLInputElement | null = null;
-    //   {
-    //     category: 'Air Conditioning',
-    //     types: ['Indoor Unit', 'Outdoor Unit']
-    //   },
-    //   {
-    //     category: 'Network Equipment',
-    //     types: ['Switch', 'Router', 'POE']
-    //   },
-    //   {
-    //     category: 'Security Systems',
-    //     types: ['Indoor Camera', 'Outdoor Camera', 'Motion Detection Sensor']
-    //   },
-    //   {
-    //     category: 'Communication Equipment',
-    //     types: ['Motorola Mobile Transceiver Station']
-    //   },
-    //   {
-    //     category: 'Microwave Links',
-    //     types: ['Cambium', 'Mikrotik', 'Sia', 'Ericsson']
-    //   },
-    //   {
-    //     category: 'Cabling',
-    //     types: ['Single Mode Fiber', 'Multi Mode Fiber', 'Network Cable']
-    //   }
-    // ];
 
     state: IProblemsState = {
-        searchResults: [],
-        selectedItem: null,
         loading: true,
         error: null,
+        searchResults: [],
         formProblem : { 
-          siteName: '',
-          siteLocation: '',
-          deviceCategory: {Id: '', Title: ''},
-          deviceType: {Id: '', Title: ''},
-          issueTitle: '',
-          description: '',
-          severity: '' as Severity,
-          reportedBy: '',
-          contactNumber: ''},
-          attachments: [],
-          selectedCategory: null
+          Id: '',
+          SiteName: '',
+          DeviceCategory: null,
+          DeviceType: null,
+          IssueTitle: '',
+          Description: '',
+          Severity: '' as Severity,
+          ReportedBy: '',
+          Attachments: null,
+          ContactNumber: ''},
+        showModal: false,
+        selectedProblem: null,
+        selectedCategory: null
       }
 
     constructor(props: IProblemsProps) {
         super(props);
+       
     }
 
-    componentWillMount(): void {
-      this.fetchSites();
+    async componentWillMount(): Promise<void> {
+      this.getProblems();
+      this.setState({loading: false});
     }
-    
-    private fetchSites = async () => {
-      try {
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 500));
-        // this.setState({ sites: this.props.sites});
-      } catch (err) {
-        this.setState({error: 'Failed to load sites. Please try again later.'});
-        console.error('Error fetching sites:', err);
-      } finally {
-        this.setState({loading:false});
-      }
-    };
 
     private handleCategoryChange = (category: string) => {
       const selected = this.props.deviceCategories.filter(eq => eq.Title === category);
       // this.setState({selectedCategory : selected || null});
       this.setState(prev => ({
         ...prev,
-        deviceCategory: category,
-        deviceType: ''
+        DeviceCategory: category,
+        DeviceType: ''
       }));
     };
 
@@ -92,7 +65,7 @@ export class Problems extends React.Component<IProblemsProps, IProblemsState> {
         id: ''//crypto.randomUUID()
       }));
       this.setState(prevState =>  ({
-        ...prevState, attachments: [...prevState.attachments, ...newAttachments]
+        ...prevState, attachments: [...prevState.formProblem.Attachments, ...newAttachments]
       }));
        
       
@@ -104,16 +77,20 @@ export class Problems extends React.Component<IProblemsProps, IProblemsState> {
 
     private removeAttachment = (id: string) => {
       this.setState(prevState => {
-        const attachment: FileWithPreview = prevState.attachments.filter(a => a.id === id).length > 0 ? prevState.attachments.filter(a => a.id === id)[0] : {file:null, id:''};
+        const attachment: FileWithPreview = prevState.formProblem.Attachments.filter(a => a.id === id).length > 0 ? prevState.formProblem.Attachments.filter(a => a.id === id)[0] : {file:null, id:''};
         // const attachment = prev.filter(a => a.id === id);
         if (attachment!.preview) {
           URL.revokeObjectURL(attachment.preview);
         }
         return { ...prevState,
-          attachments: prevState.attachments.filter(a => a.id !== id) 
+          formProblem: {
+            ...prevState.formProblem,
+            attachments: prevState.formProblem.Attachments.filter(a => a.id !== id) 
+          }
         }
       });
     };
+
     // e: React.FormEvent<HTMLFormElement>
     private handleSubmit = () => {
       alert('Under Construction. Please try again later.');
@@ -152,17 +129,22 @@ export class Problems extends React.Component<IProblemsProps, IProblemsState> {
       // }
     };
 
-    public render(): React.ReactElement<{}> {
+    private openProblemDetails = (item: any) => {
+      this.setState({formProblem : item , showModal: true});
+   }
 
+    private onCloseModal = () => {
+      this.setState({showModal: false});
+    }
+
+  public render(): React.ReactElement<{}> {
       if (this.state.loading) {
         return (
-          <div className="min-h-screen flex items-center justify-center">
-            <div className="text-gray-600">Loading sites...</div>
-          </div>
+          <Loader/>
         );
       }
     
-      if (this.state.error) {
+      else if (this.state.error) {
         return (
           <div className="min-h-screen flex items-center justify-center">
             <div className="text-red-600">{this.state.error}</div>
@@ -170,34 +152,44 @@ export class Problems extends React.Component<IProblemsProps, IProblemsState> {
         );
       }
 
+      else {
         return (
-            <div className={`directory-container`}>
-                {/* <div className={`mt-1 position-relative`}>
-                  <SearchBar keyId={'PropblemsSearchBar'} itemTitle='Problems' OnChange={this.handleSearchChange}
-                  onSelectItem={this.handleItemSelect} searchResults={this.state.searchResults}/>
-                </div> */}
-                <div className={`p-3 text-white`}>
-                {<this.ProblemForm/>}
-                </div>
-            </div>
-        );
-    }
+          <div className={`directory-container`}>
+              {/* <div className={`mt-1 position-relative`}>
+                <SearchBar keyId={'PropblemsSearchBar'} itemTitle='Problems' OnChange={this.handleSearchChange}
+                onSelectItem={this.handleItemSelect} searchResults={this.state.searchResults}/>
+              </div> */}
+              
+              <div className={`p-3 text-white`}>
+                <Grid list={this.state.searchResults} OnViewDetailsClick={(problem) => this.openProblemDetails(problem)}/>
+                <Modal
+                  showModalTitle={true}
+                  modalTitle='Problem Details' 
+                  onClose={this.onCloseModal}
+                  onSave={this.handleSubmit}
+                  showModal={this.state.showModal}
+                  buttonText='Submit Issue'
+                  modalClassSize='modal-xl'
+                  showSaveButton={false}
+                >
+                  {this.state.formProblem !== null && <this.ProblemForm />}
+                </Modal>
+              </div>
+          </div>
+      );
+      }
+  }
 
-    private ProblemForm = (): JSX.Element => {
+  private ProblemForm = (): JSX.Element => {
       return (
       <div className="card">
-        <div className={`card-header text-white text-center`} style={{backgroundColor: '#4d784e'}}>
-            {/* <AlertCircle className="h-6 w-6 text-red-500" /> */}
-            <h1 className="text-2xl font-bold text-gray-900">NOC Problem Form</h1>
-        </div>
         <div className="card-body">
-          {/* <form onSubmit={this.handleSubmit}> */}
             <form>
             <div className="row mb-2">
               {/* Site Name Dropdown */}
-              <div className="form-group col-md-6">
+              <div className="form-group col-md-4">
                 <label>Site Name</label>
-                <select required className="form-select" value={this.state.formProblem.siteName} 
+                <select required className="form-select" value={this.state.formProblem.SiteName} 
                   onChange={(e) => this.setState(prev => ({ ...prev, siteName: e.target.value }))}>
                   <option value="">Select Site</option>
                   {this.props.sites.map(site => (
@@ -209,29 +201,47 @@ export class Problems extends React.Component<IProblemsProps, IProblemsState> {
               </div>
 
              {/* Site Location */}
-              <div className="form-group col-md-6">
-                <label className="block text-sm font-medium text-gray-700">Site Location</label>
+              <div className="form-group col-md-4">
+                {/* <label className="block text-sm font-medium text-gray-700">Site Location</label>
                 <input type="text" required  className='form-control' value={this.state.formProblem.siteLocation}
-                  onChange={(e) => this.setState(prev => ({ ...prev, siteLocation: e.target.value }))}/>
+                  onChange={(e) => this.setState(prev => ({ ...prev, siteLocation: e.target.value }))}/> */}
+              </div>
+
+              {/* Equipment Type */}
+              <div className='form-group col-md-4'>
+                <label>Equipment Type</label>
+                  <select required className="form-select"
+                    value={this.state.formProblem.DeviceType !== undefined && 
+                      this.state.formProblem.DeviceType !== null ? this.state.formProblem.DeviceType.Id : ''}
+                    onChange={(e) => this.setState(prev => ({ ...prev, DeviceType: e.target.value }))}>
+                    <option value="">Select Type</option>
+                    {this.props.deviceTypes.map(eq => (<option key={eq.Id} value={eq.Id}>{eq.Title}</option>))}
+                  </select>
               </div>
             </div>
    
             <div className="row mb-2">
-                {/* Equipment Type */}
-                <div className='form-group col-md-6'>
-                  <label>Equipment Type</label>
-                  <select required className="form-select"
-                    value={this.state.formProblem.deviceType.Id}
-                    onChange={(e) => this.setState(prev => ({ ...prev, deviceType: e.target.value }))}>
-                    <option value="">Select Type</option>
-                    {this.props.deviceTypes.map(eq => (<option key={eq.Id} value={eq.Id}>{eq.Title}</option>))}
-                  </select>
-                </div>
+                {/* Issue Title */}
+              <div className='form-group col-md-4'>
+                <label>Issue Title</label>
+                <input type="text" required className="border"
+                value={this.state.formProblem.IssueTitle}
+                onChange={(e) => this.setState(prev => ({ ...prev, issueTitle: e.target.value }))}/>
+              </div>
 
-               {/* Equipment Category */}
-               <div className='form-group col-md-6'>
+               {/* Contact Information */}
+               <div className='form-group col-md-4'>
+                <label>Reported By</label>
+                <input type="text" required className="border"
+                  value={this.state.formProblem.ReportedBy}
+                  onChange={(e) => this.setState(prev => ({ ...prev, reportedBy: e.target.value }))}/>
+              </div>
+                
+              {/* Equipment Category */}
+              <div className='form-group col-md-4'>
                 <label>Equipment Category</label>
-                <select required className='form-select' value={this.state.formProblem.deviceCategory.Id}
+                <select required className='form-select' 
+                value={this.state.formProblem.DeviceCategory !== null ? this.state.formProblem.DeviceCategory.Id : ''}
                   onChange={(e) => this.handleCategoryChange(e.target.value)}>
                   <option value="">Select Category</option>
                     {/* {this.state.selectedCategory.types.map(type => (
@@ -246,44 +256,14 @@ export class Problems extends React.Component<IProblemsProps, IProblemsState> {
                   ))}
                 </select>
               </div>
-              
-            
-            </div>
-           
-            <div className='row mb-2'>
-               {/* Issue Title */}
-               <div className='form-group col-md-6'>
-               <label>Issue Title</label>
-              <input type="text" required className="border"
-                value={this.state.formProblem.issueTitle}
-                onChange={(e) => this.setState(prev => ({ ...prev, issueTitle: e.target.value }))}/>
-               </div>
-                
-              {/* Contact Information */}
-              <div className='form-group col-md-6'>
-                <label>Reported By</label>
-                <input type="text" required className="border"
-                  value={this.state.formProblem.reportedBy}
-                  onChange={(e) => this.setState(prev => ({ ...prev, reportedBy: e.target.value }))}/>
-              </div>
-            </div>
-
-            <div className='row mb-2'>
-                {/* Description */}
-                <div className='form-group col-md-12'>
-                    <label>Issue Description</label>
-                    <textarea required rows={4} className='form-control'
-                      value={this.state.formProblem.description}
-                      onChange={(e) => this.setState(prev => ({ ...prev, description: e.target.value }))}/>
-                </div>
             </div>
 
             <div className='row mb-2'>
                {/* Severity */}
-              <div className='form-group col-md-6'>
+              <div className='form-group col-md-4'>
                 <label >Severity Level</label>
                 <select required className="form-select"
-                  value={this.state.formProblem.severity}
+                  value={this.state.formProblem.Severity}
                   onChange={(e) => this.setState(prev => ({ ...prev, severity: e.target.value as Severity }))}>
                   <option value="">Select Severity</option>
                   <option value="critical">Critical</option>
@@ -292,21 +272,22 @@ export class Problems extends React.Component<IProblemsProps, IProblemsState> {
                   <option value="low">Low</option>
                 </select>
               </div>
-              <div className='form-group col-md-6'>
+              <div className='form-group col-md-4'>
                 <label>Contact Number</label>
                 <input type="tel" required className="form-control"
-                  value={this.state.formProblem.contactNumber}
+                  value={this.state.formProblem.ContactNumber}
                   onChange={(e) => this.setState(prev => ({ ...prev, contactNumber: e.target.value }))}/>
               </div>
-            </div>
-            
-            {/* File Attachments */}
-            <div className='row mb-2'>
+
+              <div className='form-group col-md-4'>
+                  {/* File Attachments */}
               <label className=""> Attachments</label>
               <div className="">
                 <div className="flex items-center gap-4">
-                  <button type="button" onClick={() => this.fileInputRef && this.fileInputRef.click()}
-                    className="">
+                  <button type="button" 
+                    onClick={() => this.fileInputRef && this.fileInputRef.click()}
+                    style={{display: 'none'}}
+                    aria-label="Add attachments"> 
                     Add Files
                   </button>
                   <p className="text-sm text-gray-500"> Upload images or documents related to the issue</p>
@@ -316,23 +297,23 @@ export class Problems extends React.Component<IProblemsProps, IProblemsState> {
                   className="hidden" multiple accept="image/*,.pdf,.doc,.docx,.txt" />
 
                 {/* Attachment Preview */}
-                {this.state.attachments.length > 0 && (
+                {this.state.formProblem.Attachments !== null && this.state.formProblem.Attachments.length > 0 && (
                   <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-                    {this.state.attachments.map(attachment => (
-                      <div key={attachment.id} className="relative group rounded-lg border border-gray-200 p-2" >
+                    {this.state.formProblem.Attachments.map(attachment => (
+                      <div key={attachment.id} >
                         <button type="button" onClick={() => this.removeAttachment(attachment.id)}
-                          className="absolute -right-2 -top-2 z-10 rounded-full bg-red-100 p-1 text-red-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                          {/* <X className="h-4 w-4" /> */}
+                          aria-label={`Remove ${attachment.file.name}`}>
+                          Remove
                         </button>
                         
                         {attachment.preview ? (
                           <div className="relative aspect-square">
-                            <img src={attachment.preview} alt="Preview" className="h-full w-full object-cover rounded"/>
+                            <img src={attachment.preview} alt="Preview" 
+                            className="h-full w-full object-cover rounded"/>
                           </div>
                         ) : (
                           <div className="aspect-square flex items-center justify-center bg-gray-50 rounded">
                             <FileUpload />
-                            {/* className="h-8 w-8 text-gray-400"  */}
                           </div>
                         )}
                         <p className="mt-1 text-xs text-gray-500 truncate">
@@ -343,13 +324,17 @@ export class Problems extends React.Component<IProblemsProps, IProblemsState> {
                   </div>
                 )}
               </div>
+              </div>
             </div>
 
-            {/* Submit Button */}
-            <div className="float-end">
-              <button type="submit" className="btn btn-primary" onSubmit={() => this.handleSubmit}>
-                {/* <Send className="h-4 w-4" />  */}
-                Submit Issue </button>
+            <div className='row mb-2'>
+                {/* Description */}
+                <div className='form-group col-md-12'>
+                    <label>Issue Description</label>
+                    <textarea required rows={3} className='form-control'
+                      value={this.state.formProblem.Description}
+                      onChange={(e) => this.setState(prev => ({ ...prev, description: e.target.value }))}/>
+                </div>
             </div>
           </form>
         </div>
@@ -357,23 +342,39 @@ export class Problems extends React.Component<IProblemsProps, IProblemsState> {
     )
   }
 
-    // Handle search input change
-    private handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      let probkemTitle: string = event.currentTarget.value;
-      probkemTitle = probkemTitle.replace(/'/g, "''");
-        if (probkemTitle === '' ) {
-          this.setState({ selectedItem: null, searchResults: []});
-        } else {
-          // this.searchProblem(probkemTitle);
-        }
-      }
+  public getProblems = async (): Promise<void> => {
+      const result: Problem [] = [];
+        try {
+          const query: string = `?$select=Id,Title,IssueTitle,Description,Severity,ContactNumber,`+
+        `Site/Id,Site/Title,DeviceType/Id,DeviceType/Title,DeviceCategory/Id,DeviceCategory/Title`+
+        `&$expand=Site,DeviceType,DeviceCategory`;
 
-    // Handle site selection
-    private handleItemSelect = (problem: Problem) => {
-      if (problem !== null ) {
-        this.setState({ selectedItem: problem, searchResults: []});
-      } else {
-        this.setState({ selectedItem: null, searchResults: []});
+          this.spCrudOperations = new SPCrudOperations(this.props.context.spHttpClient,
+                                  this.props.context.pageContext.web.absoluteUrl, 'Problems', query);
+          await this.spCrudOperations._getItemsWithQuery()
+          .then((data) => {
+            data.map((obj) => {
+              const temp: Problem = {
+                Id: obj['ID'] !== undefined && obj['ID'] !== null ? obj['ID'] : '',
+                SiteName: obj.Site !== undefined && obj.Site !== null ? obj.Site.Title.toString() : '',
+                IssueTitle: obj.IssueTitle !== undefined && obj.IssueTitle !== null ? obj.IssueTitle.toString() : '',
+                Description: obj.Description !== undefined && obj.Description !== null ? obj.Description.toString() : '',
+                Severity: obj.Severity !== undefined && obj.Severity !== null ? obj.Severity.toString() : '',
+                ReportedBy: obj.ReportedBy !== undefined && obj.ReportedBy !== null ? obj.ReportedBy.toString() : '',
+                ContactNumber: obj.ContactNumber !== undefined && obj.ContactNumber !== null ? obj.ContactNumber.toString() : '',
+                // Attachments: obj.Attachments !== undefined && obj.Attachments !== null ? obj.Attachments.toString() : '',
+                DeviceType: obj.DeviceType !== undefined && obj.DeviceType !== null ? {Id: obj.DeviceType.Id.toString(), Title: obj.DeviceType.Title.toString()} : {Id: '', Title: ''},
+                DeviceCategory: obj.DeviceCategory !== undefined && obj.DeviceCategory !== null ? {Id: obj.DeviceCategory.Id.toString(), Title: obj.DeviceCategory.Title.toString()} : {Id: '', Title: ''},
+              };
+              result.push(temp);
+            });
+            this.setState({searchResults: result , loading: false});
+          })
+          .catch(error => {
+            console.error('An error has occurred while retrieving items!', error);
+          });
+        } catch (error) {
+        console.error('An error has occurred!', error);
       }
-    }
+  }
 }
