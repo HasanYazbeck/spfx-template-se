@@ -281,7 +281,7 @@ import { FieldTypeKind } from '../Enums/enums';
         if (Object(itemsList.value)) {
           itemsList.value.map((item: any) =>  {
             const user: IUser = {
-              ID: item.Id,
+              Id: item.Id,
               Title: item.Title,
               Email: item.Email,
               LoginName: item.LoginName
@@ -316,7 +316,7 @@ import { FieldTypeKind } from '../Enums/enums';
           if (Array.isArray(itemsList.value)) {
             itemsList.value.map((item: any) =>  {
               const user: IUser = {
-                ID: item.Id,
+                Id: item.Id,
                 Title: item.Title,
                 Email: item.Email,
                 LoginName: item.LoginName
@@ -393,8 +393,8 @@ import { FieldTypeKind } from '../Enums/enums';
       const response = await this.spHttpClient.get(url, SPHttpClient.configurations.v1);
       if (response.status === 200) {
         const responseData: any = await response.json();
-        result = responseData.value.map((user: any) => {
-
+        result = responseData.value.map((user: IUser) => {
+          return user;
         });
         // console.log('Items retrieved successfully:', responseData.value);
         return result;
@@ -410,8 +410,6 @@ import { FieldTypeKind } from '../Enums/enums';
       return undefined;
     }
   }
-
-
 
   // Update Choices Field within a list 
   public async _updateChoicesField(fieldColumnName: string, itemId: string , item: any): Promise<SPHttpClientResponse>{

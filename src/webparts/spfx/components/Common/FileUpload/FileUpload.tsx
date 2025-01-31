@@ -32,18 +32,18 @@ export class FileUpload extends React.Component<{}, IFileUploadState> {
     return (
       <div>
         <button
-          type="button"
+          type='button'
           onClick={this.handleButtonClick}
-          className="inline-flex items-center gap-2 rounded-md bg-gray-50 px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-100"
+          className='inline-flex items-center gap-2 rounded-md bg-gray-50 px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-100'
         >
           {/* Replace Upload icon with a suitable icon or text */}
-          <span className="h-4 w-4">📤</span> Add Files
+          <span className='h-4 w-4'>📤</span> Add Files
         </button>
 
         {/* Hidden file input using callback ref */}
         <input
           ref={(input) => { this.fileInput = input; }} // callback ref
-          type="file"
+          type='file'
           onChange={this.handleFileChange}
           style={{ display: 'none' }}
           multiple

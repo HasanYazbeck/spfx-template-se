@@ -11,8 +11,7 @@ import {ISite , IDeviceType , IDeviceCategory , IDevice} from '../../../../Inter
 import {PhoneNumber} from '../UsefullNumbers/IUsefulNumbers';
 import {ITabsComponentProps , ITabsComponentState} from './ITabsComponent';
 import { Report } from '../Report/IReport';
-import { Problem } from '../Problems/IProblems';
-
+import { IUser } from '../../../../Interfaces/IUser';
 
 // Components
 import { SiteInfo } from '../SiteInfo/SiteInfo';
@@ -21,10 +20,11 @@ import { Problems } from '../Problems/Problems';
 import { Reports } from '../Report/Report';
 import { Loader } from '../Common/Loader/Loader';
 
+
 export default class TabsComponent extends React.Component<ITabsComponentProps, ITabsComponentState> {
   private spCrudOperations: SPCrudOperations;
   private  siteInfoProps: ISite = {
-    Id: 0,
+    Id: '0',
     Title: '',
     SiteType: '',
     Latitude: '',
@@ -44,10 +44,6 @@ export default class TabsComponent extends React.Component<ITabsComponentProps, 
     Category: '',
     Region: ''
   };
-  // private problem: Problem = {
-  //   Title: '',
-  //   SieName: ''
-  // };
   private report: Report = {
     Title: ''
   };
@@ -55,12 +51,13 @@ export default class TabsComponent extends React.Component<ITabsComponentProps, 
     super();
     this.state = {
       activeTab: 'site-tab',
+      users: [],
       sites: [],
       deviceTypes: [],
       deviceCategories: [],
       devices: [],
       loading: true,
-      error: null
+      error: undefined,
     };
   }
 
@@ -120,7 +117,7 @@ export default class TabsComponent extends React.Component<ITabsComponentProps, 
             </div>
             <div className={`tab-pane fade ${activeTab === 'problems-tab' ? 'show active' : ''}`}
             id='problems-tab-pane' role='tabpanel'>
-              <Problems context={this.props.context} problems={[]} sites={this.state.sites} devices={this.state.devices} deviceCategories={this.state.deviceCategories} deviceTypes={this.state.deviceTypes}/>
+              <Problems context={this.props.context} problems={[]} sites={this.state.sites} devices={this.state.devices} deviceCategories={this.state.deviceCategories} deviceTypes={this.state.deviceTypes} users={this.state.users}/>
             </div>
             <div className={`tab-pane fade ${activeTab === 'report-tab' ? 'show active' : ''}`}
             id='report-tab-pane' role='tabpanel'>
@@ -137,6 +134,7 @@ export default class TabsComponent extends React.Component<ITabsComponentProps, 
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 500));
       this.getSites();
+      this.getUsers();
       this.getDeviceTypes();
       this.getDeviceCategories();
       this.getDevices();
@@ -163,19 +161,19 @@ export default class TabsComponent extends React.Component<ITabsComponentProps, 
               siteType = siteType === '' ? item.Title.charAt(0).toUpperCase() + item.Title.slice(1) : siteType + '-' + item.Title.charAt(0).toUpperCase() + item.Title.slice(1);
             });
             const temp: ISite = {
-              Id: obj['ID'] !== undefined && obj['ID'] !== null ? obj['ID'] : '',
-              Title: obj['Title'] !== undefined && obj['Title'] !== null ? obj['Title'].charAt(0).toUpperCase() + obj['Title'].slice(1) : '',
+              Id: obj.Id !== undefined && obj.Id !== null ? obj.Id : undefined,
+              Title: obj.Title !== undefined && obj.Title !== null ? obj.Title.charAt(0).toUpperCase() + obj.Title.slice(1) : undefined,
               SiteType: siteType,
-              Latitude: obj['Latitude'] !== undefined && obj['Latitude'] !== null ? obj['Latitude'] : '',
-              Longtitude : obj['Logtitude'] !== undefined && obj['Logtitude'] !== null ? obj['Logtitude'] : '',
-              Priority: obj['Priority'] !== undefined && obj['Priority'] !== null ? obj['Priority'] : 0,
-              Remarks: obj['Remarks'] !== undefined && obj['Remarks'] !== null ? obj['Remarks'] : '',
-              NearestArmyCenter: obj['NearestArmyCenter'] !== undefined && obj['NearestArmyCenter'] !== null ? obj['NearestArmyCenter'] : '',
-              NearestArmyCenterNumber: obj['NearestArmyCenterNumber'] !== undefined && obj['NearestArmyCenterNumber'] !== null ? obj['NearestArmyCenterNumber'] : '',
-              PowerSourceNumber: obj['PowerSourceNumber'] !== undefined && obj['PowerSourceNumber'] !== null ? obj['PowerSourceNumber'] : '',      
-              IsSecure: obj['IsSecure'] !== undefined && obj['IsSecure'] !== null ? obj['IsSecure'] : '',
-              Kaza: obj.Kaza !== undefined && obj.Kaza !== null ? obj.Kaza.Title : '',
-              PowerSource: obj.PowerSource !== undefined && obj.PowerSource !== null ? obj.PowerSource.Title : ''
+              Latitude: obj.Latitude !== undefined && obj.Latitude !== null ? obj.Latitude : undefined,
+              Longtitude : obj.Logtitude !== undefined && obj.Logtitude !== null ? obj.Logtitude : undefined,
+              Priority: obj.Priority !== undefined && obj.Priority !== null ? obj.Priority : undefined,
+              Remarks: obj.Remarks !== undefined && obj.Remarks !== null ? obj['Remarks'] : undefined,
+              NearestArmyCenter: obj.NearestArmyCenter !== undefined && obj.NearestArmyCenter !== null ? obj.NearestArmyCenter : undefined,
+              NearestArmyCenterNumber: obj.NearestArmyCenterNumber !== undefined && obj.NearestArmyCenterNumber !== null ? obj.NearestArmyCenterNumber : undefined,
+              PowerSourceNumber: obj.PowerSourceNumber !== undefined && obj.PowerSourceNumber !== null ? obj.PowerSourceNumber : undefined,      
+              IsSecure: obj.IsSecure !== undefined && obj.IsSecure !== null ? obj.IsSecure : undefined,
+              Kaza: obj.Kaza !== undefined && obj.Kaza !== null ? obj.Kaza.Title : undefined,
+              PowerSource: obj.PowerSource !== undefined && obj.PowerSource !== null ? obj.PowerSource.Title : undefined
             };
             result.push(temp);
           });
@@ -199,8 +197,8 @@ export default class TabsComponent extends React.Component<ITabsComponentProps, 
         .then((data) => {
           data.map((obj) => {
             const temp: IDeviceType = {
-              Id: obj['ID'] !== undefined && obj['ID'] !== null ? obj['ID'] : '',
-              Title: obj['Title'] !== undefined && obj['Title'] !== null ? obj['Title'].charAt(0).toUpperCase() + obj['Title'].slice(1) : '',
+              Id: obj.Id !== undefined && obj.Id !== null ? obj.Id : undefined,
+              Title: obj.Title !== undefined && obj.Title !== null ? obj.Title.charAt(0).toUpperCase() + obj.Title.slice(1) : undefined,
             };
             result.push(temp);
           });
@@ -224,9 +222,9 @@ export default class TabsComponent extends React.Component<ITabsComponentProps, 
         .then((data) => {
           data.map((obj) => {
             const temp: IDeviceCategory = {
-              Id: obj['ID'] !== undefined && obj['ID'] !== null ? obj['ID'] : '',
-              Title: obj['Title'] !== undefined && obj['Title'] !== null ? obj['Title'].charAt(0).toUpperCase() + obj['Title'].slice(1) : '',
-              DeviceTypes: obj.DeviceTypes !== undefined && obj.DeviceTypes !== null ? {Id: obj.DeviceTypes.Id.toString(), Title: obj.DeviceTypes.Title.toString()} : {Id: '', Title: ''},
+              Id: obj.Id !== undefined && obj.Id !== null ? obj.Id : undefined,
+              Title: obj.Title !== undefined && obj.Title !== null ? obj.Title.charAt(0).toUpperCase() + obj.Title.slice(1) : undefined,
+              DeviceTypes: obj.DeviceTypes !== undefined && obj.DeviceTypes !== null ? {Id: obj.DeviceTypes.Id.toString(), Title: obj.DeviceTypes.Title.toString()} : undefined,
             };
             result.push(temp);
           });
@@ -250,10 +248,10 @@ export default class TabsComponent extends React.Component<ITabsComponentProps, 
         .then((data) => {
           data.map((obj) => {
             const temp: IDevice = {
-              Id: obj['ID'] !== undefined && obj['ID'] !== null ? obj['ID'] : '',
-              Title: obj['Title'] !== undefined && obj['Title'] !== null ? obj['Title'].charAt(0).toUpperCase() + obj['Title'].slice(1) : '',
-              DeviceType: obj.DeviceType !== undefined && obj.DeviceType !== null ? {Id: obj.DeviceType.Id.toString(), Title: obj.DeviceType.Title.toString()} : {Id: '', Title: ''},
-              DeviceCategory: obj.DeviceCategory !== undefined && obj.DeviceCategory !== null ? {Id: obj.DeviceCategory.Id.toString(), Title: obj.DeviceCategory.Title.toString()} : {Id: '', Title: ''},
+              Id: obj.Id !== undefined && obj.Id !== null ? obj.Id : undefined,
+              Title: obj.Title !== undefined && obj.Title !== null ? obj.Title.charAt(0).toUpperCase() + obj.Title.slice(1) : undefined,
+              DeviceType: obj.DeviceType !== undefined && obj.DeviceType !== null ? {Id: obj.DeviceType.Id.toString(), Title: obj.DeviceType.Title.toString()} : undefined,
+              DeviceCategory: obj.DeviceCategory !== undefined && obj.DeviceCategory !== null ? {Id: obj.DeviceCategory.Id.toString(), Title: obj.DeviceCategory.Title.toString()} : undefined,
             };
             result.push(temp);
           });
@@ -265,5 +263,38 @@ export default class TabsComponent extends React.Component<ITabsComponentProps, 
       } catch (error) {
       console.error('An error has occurred!', error);
     }
+  }
+
+  public  getUsers = (): void => {
+    const result: IUser [] = [];
+    try {
+      this.spCrudOperations = new SPCrudOperations(this.props.context.spHttpClient,
+                              this.props.context.pageContext.web.absoluteUrl, '', '');
+      this.spCrudOperations.GetSPUsers()
+      .then((data) => {
+        data.map((obj) => {
+          if(obj !== undefined){
+            const temp: IUser = {
+              Id: obj.Id !== undefined && obj.Id !== null ? obj.Id  : undefined,
+              LoginName: obj.LoginName !== undefined && obj.LoginName !== null ? obj.LoginName : undefined,
+              Title: obj.Title !== undefined && obj.Title !== null ? obj.Title.charAt(0).toUpperCase() + obj.Title.slice(1) : undefined,
+              Email: obj.Email !== undefined && obj.Email !== null ? obj.Email : undefined,
+              IsSiteAdmin: obj.IsSiteAdmin !== undefined && obj.IsSiteAdmin !== null ? obj.IsSiteAdmin : false,
+              IsEmailAuthenticationGuestUser: obj.IsEmailAuthenticationGuestUser !== undefined && obj.IsEmailAuthenticationGuestUser !== null ? obj.IsEmailAuthenticationGuestUser : false,
+              IsHiddenInUI: obj.IsHiddenInUI !== undefined && obj.IsHiddenInUI !== null ? obj.IsHiddenInUI : false,
+              IsShareByEmailGuestUser: obj.IsShareByEmailGuestUser !== undefined && obj.IsShareByEmailGuestUser !== null ? obj.IsShareByEmailGuestUser : false,
+              PrincipalType: obj.PrincipalType !== undefined && obj.PrincipalType !== null ? obj.PrincipalType : undefined,
+            };
+            result.push(temp);
+          }
+        });
+        this.setState({users: result})  
+      })
+      .catch(error => {
+        console.error('An error has occurred while retrieving items!', error);
+      });
+    } catch (error) {
+    console.error('An error has occurred!', error);
+  }
   }
 }

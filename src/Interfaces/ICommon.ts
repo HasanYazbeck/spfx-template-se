@@ -1,43 +1,47 @@
 
-export interface ICommon {
-    Id: string;
-    Title: string;
-}
+  export interface ICommon {
+    Id?: string | undefined;
+    Title?: string | undefined;
+  }
 
-export type ISite = {
-    Id?: number;
-    Title: string;
-    SiteType?: string;
-    Kaza?: string;
-    IsSecure?: boolean;
-    PowerSource?: string;
-    PowerSourceNumber?: string;
-    Priority?: number;
-    NearestArmyCenter?: string;
-    NearestArmyCenterNumber?: string;
-    Remarks?: string;
-    Latitude?: string;
-    Longtitude?: string;
+  export type ISite = {
+    Id?: string | undefined;
+    Title?: string | undefined;
+    SiteType?: string | undefined;
+    Kaza?: string | undefined;
+    IsSecure?: boolean | undefined;
+    PowerSource?: string | undefined;
+    PowerSourceNumber?: string | undefined;
+    Priority?: number | undefined;
+    NearestArmyCenter?: string | undefined;
+    NearestArmyCenterNumber?: string | undefined;
+    Remarks?: string | undefined;
+    Latitude?: string | undefined;
+    Longtitude?: string | undefined;
   }
 
   export type IDeviceType = {
-    Id: string;
-    Title: string;
+    Id?: string | undefined;
+    Title?: string | undefined;
   }
 
   export type IDeviceCategory = {
-    Id: string;
-    Title: string;
+    Id?: string | undefined;
+    Title?: string | undefined;
     DeviceTypes?: IDeviceType;
   }
 
   export type IDevice = {
-    Id: string;
-    Title: string;
-    DeviceType?: IDeviceType;
-    DeviceCategory?: IDeviceCategory;
+    Id?: string | undefined;
+    Title?: string | undefined;
+    DeviceType?: IDeviceType | undefined;
+    DeviceCategory?: IDeviceCategory | undefined;
   }
 
-  
+  export interface DateRange {
+    startDate: Date | undefined;
+    endDate: Date | undefined;
+  }
+
 
   

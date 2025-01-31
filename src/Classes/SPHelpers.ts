@@ -60,4 +60,15 @@ export class SPHelpers {
     
         return date;
     }
+
+    public adjustDateForGMTOffset(dateString: string): string {
+        var myDate = new Date(dateString);
+        var gmtOffset = myDate.getTimezoneOffset(); // Get the offset in minutes
+        // Convert minutes to milliseconds
+        var offsetInMilliseconds = gmtOffset * 60 * 1000;
+
+        // Add the offset to the date
+        var adjustedDate = new Date(myDate.getTime() - offsetInMilliseconds);
+        return adjustedDate.toISOString().split('T')[0];
+    }
 }

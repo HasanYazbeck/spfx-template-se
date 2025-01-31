@@ -48,7 +48,7 @@ export class SiteInfo extends React.Component<ISiteInfoProps, ISiteInfoState> {
 
   // Handle Site selection
   private handleSiteSelect = (site: ISite) => {
-    if (site.Id !== 0) {
+    if (site.Id !== '0') {
       this.getRemarks(site.Id.toString(),this.listName);
       this.setState({ selectedSite: site, searchResults: []});
     } else {

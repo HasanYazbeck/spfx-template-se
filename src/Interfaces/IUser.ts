@@ -1,11 +1,11 @@
 export interface IUser {
-    ID: number | string;
-    Title: string;
-    Email: string;
-    LoginName: string;
-    IsSiteAdmin?: boolean;
-    IsEmailAuthenticationGuestUser?: boolean;
-    IsHiddenInUI?: boolean;
-    IsShareByEmailGuestUser?: boolean;
-    PrincipalType?: number;
+    Id?: number | string | undefined;
+    Title?: string | undefined;
+    Email?: string | undefined;
+    LoginName?: string | undefined;
+    IsSiteAdmin?: boolean | undefined;
+    IsEmailAuthenticationGuestUser?: boolean | undefined;
+    IsHiddenInUI?: boolean | undefined;
+    IsShareByEmailGuestUser?: boolean | undefined;
+    PrincipalType?: number | undefined;
 }

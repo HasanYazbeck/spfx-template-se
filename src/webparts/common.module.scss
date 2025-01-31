@@ -1,5 +1,15 @@
 @import '~@microsoft/sp-office-ui-fabric-core/dist/sass/SPFabricCore.scss';
 
+.militaryGreenBackground {
+    background-color: #4d784e !important;
+}
+.militaryGreenColor {
+    color: #4d784e !important;
+}
+
+.borderNone {
+    border: none !important;
+}
 .formTextCustom {
     margin-top: .25rem;
     color: var(--bs-secondary-color);
@@ -26,7 +36,7 @@
     color: #424756; /* Highlight active page */
   }
   
-      .prev, .next {
+  .prev, .next {
       background: rgba(255, 255, 255, 0.1);
       border: none;
       color: #4d784e;
@@ -35,3 +45,5 @@
       border-radius: 20px;
       font-size: 10px;
       transition: all 0.2s ease;}
+
+
