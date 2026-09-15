@@ -6,6 +6,40 @@ SharePoint Framework web parts for SharePoint Subscription Edition. The solution
 
 The project uses React, TypeScript, PnPjs, Bootstrap, and SharePoint Framework client-side web parts.
 
+## Demo
+
+The following recording shows the custom calendar search bar in the calendar events experience:
+
+![Custom calendar search bar demo](docs/assets/custom-calender-search-bar.gif)
+
+The demo asset is stored at `docs/assets/custom-calender-search-bar.gif`.
+
+## Features
+
+### Calendar Events web part
+
+- Search and browse calendar events by date.
+- Create and update events with title, location, description, category, start time, and end time.
+- Supports recurring and completed event state.
+- Filters events by categories such as Meeting, Work hours, Business, Holiday, Get-together, Gifts, and Anniversary.
+- Uses SharePoint data through the PnPjs-backed CRUD helpers in this repository.
+
+### Site operations web part
+
+- Browse and search SharePoint sites with site type, location, power source, priority, security, and contact details.
+- Browse useful phone numbers by category.
+- Review site problems and associate them with sites, devices, device types, and device categories.
+- Create and submit reports.
+- Loads SharePoint users and list data through the shared CRUD operations and helper classes.
+- Uses Bootstrap navigation, tabs, forms, tables, and responsive layout styles.
+
+This extension illustrates the following concepts:
+
+- Building multiple React-based SPFx web parts in one solution.
+- Reading and writing SharePoint list data from a client-side web part.
+- Sharing TypeScript interfaces, CRUD operations, and helper classes across web parts.
+- Combining SPFx styles with Bootstrap and CSS modules.
+
 ## Used SharePoint Framework Version
 
 ![SPFx version](https://img.shields.io/badge/SPFx-1.4.1-green)
@@ -56,40 +90,6 @@ The project targets SharePoint Framework `1.4.1` and uses the SPFx build toolcha
 - Install dependencies with `npm install`.
 - Start the local workbench with `npx gulp serve` or `./node_modules/.bin/gulp serve`.
 - Open the SharePoint workbench and add either web part to a page.
-
-## Features
-
-### Calendar Events web part
-
-- Search and browse calendar events by date.
-- Create and update events with title, location, description, category, start time, and end time.
-- Supports recurring and completed event state.
-- Filters events by categories such as Meeting, Work hours, Business, Holiday, Get-together, Gifts, and Anniversary.
-- Uses SharePoint data through the PnPjs-backed CRUD helpers in this repository.
-
-### Site operations web part
-
-- Browse and search SharePoint sites with site type, location, power source, priority, security, and contact details.
-- Browse useful phone numbers by category.
-- Review site problems and associate them with sites, devices, device types, and device categories.
-- Create and submit reports.
-- Loads SharePoint users and list data through the shared CRUD operations and helper classes.
-- Uses Bootstrap navigation, tabs, forms, tables, and responsive layout styles.
-
-This extension illustrates the following concepts:
-
-- Building multiple React-based SPFx web parts in one solution.
-- Reading and writing SharePoint list data from a client-side web part.
-- Sharing TypeScript interfaces, CRUD operations, and helper classes across web parts.
-- Combining SPFx styles with Bootstrap and CSS modules.
-
-## Demo
-
-The following recording shows the custom calendar search bar in the calendar events experience:
-
-![Custom calendar search bar demo](docs/assets/custom-calender-search-bar.gif)
-
-The demo asset is stored at `docs/assets/custom-calender-search-bar.gif`.
 
 ## References
 
