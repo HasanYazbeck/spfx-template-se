@@ -28,13 +28,10 @@ export class SearchBar extends React.Component<ISearchBarProps<any>, ISearchBarS
           {/* input-group-text */}
             <div className={this.props.className === undefined ?  `input-group` : `${this.props.className}` }>
                 <span className='input-group-text' id='inputGroup-sizing-sm'>Search</span>
-                <input id= {this.props.keyId} onChange={this.props.OnChange}
-                  type='text'
-                  className='form-control'
-                  aria-label='Sizing example input'
-                  aria-describedby='inputGroup-sizing-sm'
-                  placeholder={this.props.placeholder}
-                  // value= {selectedItemTitle}
+                <input id= {this.props.keyId} onChange={this.props.OnChange} type='text'
+                  className='form-control' aria-label='Sizing example input'
+                  aria-describedby='inputGroup-sizing-sm' placeholder={this.props.placeholder}
+                  // value= {this.props.value}
                   />
                 </div>
                 {this.props.searchResults.length > 0 && (

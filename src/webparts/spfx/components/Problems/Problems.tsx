@@ -17,7 +17,6 @@ import { IUser } from '../../../../Interfaces/IUser';
 // Styles
 import styles from '../../../common.module.scss';
 import { SearchBar } from '../SearchBarComponent/SearchBar';
-import { DateRange } from '../../../../Interfaces/ICommon';
 
 export class Problems extends React.Component<IProblemsProps, IProblemsState> {
     private spCrudOperations: SPCrudOperations;
@@ -34,6 +33,7 @@ export class Problems extends React.Component<IProblemsProps, IProblemsState> {
           Site: undefined,
           DeviceCategory: undefined,
           DeviceType: undefined,
+          Device: undefined,
           IssueTitle: undefined,
           Description: undefined,
           Severity: undefined as Severity,
@@ -43,10 +43,13 @@ export class Problems extends React.Component<IProblemsProps, IProblemsState> {
           Created: undefined
         },
         showModal: false,
+        showProblem: false,
+        addProblem: false,
         selectedProblem: undefined,
         selectedCategory: undefined,
         startDate: undefined,
-        endDate: undefined
+        endDate: undefined,
+        dateError: false
       }
 
     constructor(props: IProblemsProps) {
@@ -57,6 +60,16 @@ export class Problems extends React.Component<IProblemsProps, IProblemsState> {
       this.getProblems();
       this.setState({loading: false});
     }
+
+    private handleTypeChange = (deviceType: string) => {
+      const selected = this.props.deviceTypes.filter(eq => eq.Title === deviceType);
+      // this.setState({selectedCategory : selected || null});
+      this.setState(prev => ({
+        ...prev,
+        DeviceCategory: '',
+        DeviceType: deviceType
+      }));
+    };
 
     private handleCategoryChange = (category: string) => {
       const selected = this.props.deviceCategories.filter(eq => eq.Title === category);
@@ -103,7 +116,7 @@ export class Problems extends React.Component<IProblemsProps, IProblemsState> {
     };
 
     // e: React.FormEvent<HTMLFormElement>
-    private handleSubmit = () => {
+    private handleSubmit = () : void => {
       alert('Under Construction. Please try again later.');
       // e.preventDefault();
       // try {
@@ -148,72 +161,73 @@ export class Problems extends React.Component<IProblemsProps, IProblemsState> {
    }
 
     private onCloseModal = () => {
-      this.setState({showModal: false});
+      this.setState({showModal: false , addProblem: false , showProblem: false });
     }
 
-    private handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const searchTerm = e.target.value.toLowerCase();
-      const filteredProblems = this.state.problems.filter(problem => 
-        problem.Site!.Title!.toString().toLowerCase().indexOf(searchTerm) >= 0 ||
-        problem.IssueTitle!.toString().toLowerCase().indexOf(searchTerm) >= 0 ||
-        problem.Author!.Title!.toString().toLowerCase().indexOf(searchTerm) >= 0
-      );
-
-      this.setState({problems: filteredProblems});
-    }
-
-    
-    private filterProblemsByDate = () => {
-      const { startDate, endDate } = this.state;
-      
-      // Only filter if we have both dates
-      if (startDate && endDate) {
-        // Reset time portions to compare dates only
-        const start = new Date(startDate.toString());
-        const end = new Date(endDate.toString());
-        start.setHours(0, 0, 0, 0);
-        end.setHours(23, 59, 59, 999);
-    
-        const filteredProblems = this.state.problems.filter(problem => {
-          if (!problem.Created) return false;
-          
-          const problemDate = new Date(problem.Created.toString());
-          return problemDate >= start && problemDate <= end;
-        });
-    
-        this.setState({ problems: filteredProblems });
+    private onDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const {id , value} = e.target;
+      if(id === 'startDate') {
+        this.setState({ startDate: value});
+      } else if (id === 'endDate') {
+        this.setState({ endDate: value});
       }
+      const startDate = (document.getElementById('startDate') as HTMLInputElement).value;
+      const endDate = (document.getElementById('endDate') as HTMLInputElement).value;
+      if(startDate && endDate){
+        const start: Date = new Date(startDate);
+        const end: Date = new Date(endDate);
+
+        if(end && start && end < start) {
+          this.setState({dateError: true});
+          return false;
+        }
+      }
+      this.setState({dateError: false});
     }
 
     private applyFilters = () => {
       const searchInput = document.getElementById('ProblemsSearchBar') as HTMLInputElement;
-      
-      let filteredProblems = [...this.state.originalProblems];
+      let filteredProblems: Problem[] = [...this.state.originalProblems];
       const searchTerm = searchInput.value.toLowerCase() || '';
     
       // Apply date filter if dates are set
       if (this.state.startDate && this.state.endDate) {
-        const start = new Date(this.state.startDate.toString());
-        const end = new Date(this.state.endDate.toString());
+        const start: Date = new Date(this.state.startDate);
+        const end: Date = new Date(this.state.endDate);
         start.setHours(0, 0, 0, 0);
         end.setHours(23, 59, 59, 999);
-    
+        
         filteredProblems = filteredProblems.filter(problem => {
           if (!problem.Created) return false;
           const problemDate = new Date(problem.Created.toString());
           return problemDate >= start && problemDate <= end;
         });
       }
-    
+      else if (this.state.startDate && !this.state.endDate) {
+        const start: string = new Date((document.getElementById('startDate') as HTMLInputElement).value).toLocaleDateString('en-US');
+        filteredProblems = filteredProblems.filter(problem => {
+          if (!problem.Created) return false;
+          const problemDate = new Date(problem.Created.toLocaleDateString('en-US'));
+          return problemDate.toLocaleDateString('en-US') === start ;
+        });
+      }
+      else if (!this.state.startDate && this.state.endDate) {
+        const end: string = new Date((document.getElementById('endDate') as HTMLInputElement).value).toLocaleDateString('en-US');
+        filteredProblems = filteredProblems.filter(problem => {
+          if (!problem.Created) return false;
+          const problemDate = new Date(problem.Created.toLocaleDateString('en-US'));
+          return problemDate.toLocaleDateString('en-US') === end ;
+        });
+      }
       // Apply search filter
       if (searchTerm) {
         filteredProblems = filteredProblems.filter(problem => 
           problem.Site!.Title!.toString().toLowerCase().indexOf(searchTerm) >= 0 ||
           problem.IssueTitle!.toString().toLowerCase().indexOf(searchTerm) >= 0 ||
-          problem.Author!.Title!.toString().toLowerCase().indexOf(searchTerm) >= 0
+          problem.Author!.Title!.toString().toLowerCase().indexOf(searchTerm) >= 0 ||
+          problem.Severity.toString().toLowerCase().indexOf(searchTerm) >=0
         );
       }
-    
       this.setState({problems: filteredProblems});
     }
 
@@ -248,7 +262,6 @@ export class Problems extends React.Component<IProblemsProps, IProblemsState> {
                   OnChange={() => {}}
                   onSelectItem={() => {}} 
                   searchResults={[]}
-                  placeholder='Search by Site, Issue Title, Reported By'
                   />
                 </div>
               </div>
@@ -261,31 +274,48 @@ export class Problems extends React.Component<IProblemsProps, IProblemsState> {
                    <span className='input-group-text' id='inputGroup-sizing-sm'>Start Date</span>
                     <input type='date' id='startDate' className='form-control'
                       value={this.state.startDate !== undefined ? 
-                        this.state.startDate.toString().split('T')[0] : ''}/>
+                        this.state.startDate.toString().split('T')[0] : ''}
+                         onChange={(e) => this.onDateChange(e)}
+                        />
                   </div>
                   <div className='form-range input-group flex-grow-1'>
-                  <span className='input-group-text' id='inputGroup-sizing-sm'>End Date</span>
+                    <span className='input-group-text' id='inputGroup-sizing-sm'>End Date</span>
                     <input type='date' id='endDate' className='form-control'
                       value={this.state.endDate !== undefined ? 
-                        this.state.endDate.toString().split('T')[0] : ''}/>
+                        this.state.endDate.toString().split('T')[0] : ''}
+                        onChange={(e) => this.onDateChange(e)}
+                        />
                   </div>
                 </div>
+                <div className='float-end pt-3 text-white'>
+                {this.state.dateError && (<small className='text-warning'>End date should be greater than Start date</small>)}
+                </div>
+                
               </div>
             </div>
 
             <div className='row'>
-                <div className='col-md-12'>
-                <button className='btn btn-primary btn-sm align-self-end mt-3 float-end'
+                <div className='col-md-12 mb-2 mt-1'>
+                <button className={`align-self-end btn btn-primary btn-sm float-end ${styles.militaryBrownBackground}`}
                          onClick={this.applyFilters} 
                         >Apply Filter</button>
-                  <button className='btn btn-secondary btn-sm btn-warning align-self-end mt-3 m-2 float-end' 
+                  <button className='align-self-end btn btn-secondary btn-sm btn-warning float-end mx-lg-2' 
                     onClick={this.resetDateFilter}
                   >Reset</button>
                 </div>
             </div>
-
-              <div className={`p-3 text-white`}>
-                <Grid list={this.state.problems} OnViewDetailsClick={(problem) => this.openProblemDetails(problem)}/>
+              <div>
+                <Grid list={this.state.problems} 
+                      OnViewDetailsClick={(problem) => this.openProblemDetails(problem)}
+                      // OnClick={() => {this.setState({ addProblem: true , showModal : true , 
+                      //                                 formProblem : { 
+                      //                                   Id:'', 
+                      //                                   Site:{Id:'' , Title:'' , PowerTechSiteName: '' ,MTSID : '' } ,
+                      //                                   DeviceCategory: '', 
+                      //                                   DeviceType:'' }
+                      //                                 })
+                      //                           }}
+                                                />
                 <Modal
                   showModalTitle={true}
                   modalTitle='Problem Details' 
@@ -443,7 +473,16 @@ export class Problems extends React.Component<IProblemsProps, IProblemsState> {
                 )}
               </div>
               </div>
-              <div className='form-group col-md-4'></div>
+              <div className='form-group col-md-4'>
+                   {/* Device Type */}
+                <label className={`text-white`}>Device</label>
+                  <select required className='form-select'
+                    value={this.state.formProblem.Device !== undefined ? this.state.formProblem.Device.Id : ''}
+                    onChange={(e) => this.setState(prev => ({ ...prev, Device: e.target.value }))}>
+                    <option value=''>Select Device</option>
+                    {this.props.devices.map(eq => (<option key={eq.Id} value={eq.Id}>{eq.Title}</option>))}
+                  </select>
+              </div>
             </div>
 
             <div className='row mb-2'>
@@ -465,11 +504,11 @@ export class Problems extends React.Component<IProblemsProps, IProblemsState> {
       const result: Problem [] = [];
         try {
           const query: string = `?$select=Id,Title,IssueTitle,Description,Severity,ContactNumber,AuthorId,Created,`+
-        `Site/Id,Site/Title,DeviceType/Id,DeviceType/Title,DeviceCategory/Id,DeviceCategory/Title`+
-        `&$expand=Site,DeviceType,DeviceCategory`;
-
+        `Site/Id,Site/Title,Site/MTSID,Site/PowerTechSiteName,DeviceType/Id,DeviceType/Title,DeviceCategory/Id,DeviceCategory/Title,` +
+        `Device/Id,Device/Title` +
+        `&$expand=Site,Device,DeviceType,DeviceCategory`;
           this.spCrudOperations = new SPCrudOperations(this.props.context.spHttpClient,
-                                  this.props.context.pageContext.web.absoluteUrl, 'Problems', query);
+                                  this.props.context.pageContext.web.absoluteUrl, 'Problem', query);
           await this.spCrudOperations._getItemsWithQuery()
           .then((data) => {
             data.map((obj) => {
@@ -483,14 +522,26 @@ export class Problems extends React.Component<IProblemsProps, IProblemsState> {
                   Id: obj.Id !== undefined && obj.Id !== null ? obj.Id : undefined,
                   Author: author !== undefined ? author : undefined,
                   Created: created !== undefined ? created : undefined,
-                  Site: obj.Site !== undefined && obj.Site !== null ? {Id: obj.Site.Id.toString(), Title: obj.Site.Title.toString()} : {Id: '', Title: ''},
+                  Site: obj.Site !== undefined && obj.Site !== null ? {
+                        Id: obj.Site.Id, 
+                        Title: obj.Site.Title,
+                        MTSID: obj.Site.MTSID, 
+                        PowerTechSiteName: obj.Site.PowerTechSiteName } : {Id: undefined, 
+                        Title: undefined , MTSID: undefined , PowerTechSiteName: undefined
+                        },
                   IssueTitle: obj.IssueTitle !== undefined && obj.IssueTitle !== null ? obj.IssueTitle.toString() : '',
                   Description: obj.Description !== undefined && obj.Description !== null ? obj.Description.toString() : '',
                   Severity: obj.Severity !== undefined && obj.Severity !== null ? obj.Severity.toString() : '',
                   ContactNumber: obj.ContactNumber !== undefined && obj.ContactNumber !== null ? obj.ContactNumber.toString() : '',
                   DeviceType: obj.DeviceType !== undefined && obj.DeviceType !== null ? {Id: obj.DeviceType.Id.toString(), Title: obj.DeviceType.Title.toString()} : {Id: '', Title: ''},
                   DeviceCategory: obj.DeviceCategory !== undefined && obj.DeviceCategory !== null ? {Id: obj.DeviceCategory.Id.toString(), Title: obj.DeviceCategory.Title.toString()} : {Id: '', Title: ''},
-                // Attachments: obj.Attachments !== undefined && obj.Attachments !== null ? obj.Attachments.toString() : '',
+                  Device: obj.Device !== undefined && obj.Device !== null ? 
+                  {
+                    Id: obj.Device.Id, Title: obj.Device.Title ,
+                    DeviceType : {},
+                    DeviceCategory : {}
+                  } : undefined ,
+                  // Attachments: obj.Attachments !== undefined && obj.Attachments !== null ? obj.Attachments.toString() : '',
                 };
                 result.push(temp);
               }

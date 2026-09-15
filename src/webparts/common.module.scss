@@ -1,10 +1,18 @@
 @import '~@microsoft/sp-office-ui-fabric-core/dist/sass/SPFabricCore.scss';
 
 .militaryGreenBackground {
-    background-color: #4d784e !important;
+    background-color: #6E8E59 !important;
 }
 .militaryGreenColor {
-    color: #4d784e !important;
+    color: #6E8E59 !important;
+}
+
+.militaryBrownBackground {
+  background-color: #675645 !important;
+}
+
+.militaryBrownColor {
+  color: #675645 !important;
 }
 
 .borderNone {
@@ -39,7 +47,7 @@
   .prev, .next {
       background: rgba(255, 255, 255, 0.1);
       border: none;
-      color: #4d784e;
+      color: #6E8E59;
       cursor: pointer;
       padding: 8px 16px;
       border-radius: 20px;

@@ -2,7 +2,6 @@
 import styles from './Spfx.module.scss';
 import { ISpfxProps , ISpfxState} from './ISpfxProps';
 import 'bootstrap/dist/css/bootstrap.min.css';
-// import { BsAlarm } from "react-icons/bs";
 import TabsComponent from './TabsComponent/TabsComponent';
 import { ISite } from '../../../Interfaces/ICommon';
 import * as React from 'react';

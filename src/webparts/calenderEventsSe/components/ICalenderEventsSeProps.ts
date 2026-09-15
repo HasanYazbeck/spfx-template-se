@@ -1,6 +1,6 @@
-import { Guid } from "@microsoft/sp-core-library";
-import { WebPartContext } from "@microsoft/sp-webpart-base";
-import { ISite } from "../../../Interfaces/ICommon";
+import { Guid } from '@microsoft/sp-core-library';
+import { WebPartContext } from '@microsoft/sp-webpart-base';
+import { ISite } from '../../../Interfaces/ICommon';
 
 export interface ICalenderEventsSeProps {
   description: string;

@@ -1,13 +1,12 @@
 import * as React from 'react';
 
-
 export class FileUpload extends React.Component<{}, IFileUploadState> {
-  private fileInput: HTMLInputElement | null = null;
+  private fileInput: HTMLInputElement | undefined = undefined;
 
   constructor(props: {}) {
     super(props);
     this.state = {
-      files: [],
+      files: []
     };
   }
 
@@ -16,19 +15,18 @@ export class FileUpload extends React.Component<{}, IFileUploadState> {
     const files = Array.prototype.slice.call(event.target.files || []); 
     // const files = event.target.files ? Array.from(event.target.files) : [];
     this.setState({ files });
-  };
+  }
 
   // Trigger the file input's click method
   private handleButtonClick = () => {
     if (this.fileInput) {
       this.fileInput.click();
     }
-  };
+  }
 
   // Render the component
   public render() {
     const { files } = this.state;
-
     return (
       <div>
         <button

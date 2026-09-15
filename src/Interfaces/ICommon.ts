@@ -6,7 +6,9 @@
 
   export type ISite = {
     Id?: string | undefined;
+    MTSID: string | undefined;
     Title?: string | undefined;
+    PowerTechSiteName: string | undefined;
     SiteType?: string | undefined;
     Kaza?: string | undefined;
     IsSecure?: boolean | undefined;

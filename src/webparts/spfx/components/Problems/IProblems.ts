@@ -7,6 +7,7 @@ import { IUser } from '../../../../Interfaces/IUser';
     Site: ISite | undefined
     DeviceCategory: IDeviceCategory | undefined;
     DeviceType: IDeviceType | undefined;
+    Device: IDevice | undefined;
     IssueTitle: string | undefined;
     Description: string | undefined;
     Severity: Severity | undefined;
@@ -35,9 +36,12 @@ import { IUser } from '../../../../Interfaces/IUser';
     error: string | undefined;
     selectedCategory: IDevice | undefined,
     showModal: boolean,
+    showProblem: boolean,
+    addProblem: boolean,
     selectedProblem: Problem | undefined,
-    startDate: Date | undefined;
-    endDate: Date | undefined;
+    startDate: string | undefined;
+    endDate: string | undefined;
+    dateError: boolean;
   }   
 
   export type Severity = 'critical' | 'high' | 'medium' | 'low';

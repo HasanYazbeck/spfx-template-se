@@ -16,5 +16,5 @@ export enum FieldTypeKind {
     Military = 'Military Centers',
     Civilian = 'Civilian',
     Soldiers = 'Soldiers Numbers',
-    map = "map"
+    map = 'map'
   }

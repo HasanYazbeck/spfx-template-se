@@ -4,14 +4,13 @@ import styles from './CalenderEventsSe.module.scss';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { SPCrudOperations } from '../../../Classes/SPCrudOperations';
 import { SPHelpers } from '../../../Classes/SPHelpers';
-import CalenderEventsSeWebPart from '../CalenderEventsSeWebPart';
 import { ICommon, ISite } from '../../../Interfaces/ICommon';
 
 export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICalenderEventsSeState> {
-  private spCrudOperation : SPCrudOperations ;
+  private spCrudOperation: SPCrudOperations ;
   private spHelpers: SPHelpers = new SPHelpers();
   private timeInterval: number | undefined;
-  private loggedInUsername : string = this.props.context.pageContext.user.displayName;
+  // private loggedInUsername: string = this.props.context.pageContext.user.displayName;
   state: ICalenderEventsSeState = {
     events: [],
     sites:[],
@@ -32,13 +31,11 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
   }
   
   componentDidMount(): void { 
-    
     this.loadWebPartLists();
      // Update the time every second
      this.timeInterval = window.setInterval( () => {
       this.setState({
         currentTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        
       });
     }, 1000);
   }
@@ -54,12 +51,11 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
     const events: IEvent[] =  await this.GetEvents();
     const sites: ISite[] = await this.GetSites();
      this.setState({events: events , sites: sites});
-  };
+  }
 
   private getDaysInMonth = (year: number, month: number): number => {
     return new Date(year, month + 1, 0).getDate();
-  };
-
+  }
   // ***************************** JSX Elements ***********************************
 
   private CalendarDays = (): JSX.Element => {
@@ -112,7 +108,7 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
         </div>
       </div>
     );
-  };
+  }
 
   private EventsList = (): JSX.Element => {
     const { selectedDate, events } = this.state;
@@ -143,7 +139,7 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
         ))}
       </div>
     );
-  };
+  }
 
   private Pagination = (): JSX.Element => {
     const totalPages = this.getTotalPages();
@@ -164,15 +160,14 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
               {page}
             </span>
           ))}
-          <button className={styles.next} onClick={this.handleNextPage}
-          disabled={this.state.currentPage === totalPages} role=''>❯</button>
+          <button className={styles.next} onClick={this.handleNextPage} disabled={this.state.currentPage === totalPages} role=''>❯</button>
         </div>
       );
     }
     else {
       return null;
     }
-  };
+  }
 
   private EventModal = (): JSX.Element => {
     return(
@@ -346,37 +341,37 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
     const newDate: Date = new Date(currentMonth.toDateString());
     newDate.setMonth(newDate.getMonth() - 1);
     this.setState({ currentDate: newDate });
-  };
+  }
 
   private handleNextMonth = () => {
     const currentMonth: Date  = this.state.currentDate; // Assuming `currentMonth` is part of your state
     const newDate: Date = new Date(currentMonth.toDateString());
     newDate.setMonth(newDate.getMonth() + 1);
     this.setState({ currentDate: newDate });
-  };
+  }
 
   private handleDayClick = (day: number): void => {
     const selectedDate = new Date(this.state.currentDate.toDateString());
     selectedDate.setDate(day);
     this.setState({ selectedDate , currentPage: 1 });
-  };
+  }
 
   private handlePrevPage = () => {
     this.setState(prevState => ({
       currentPage: Math.max(1, prevState.currentPage - 1) // Ensure page is at least 1
     }));
-  };
+  }
 
   private handleNextPage = () => {
     const totalPages = this.getTotalPages();
     this.setState(prevState => ({
       currentPage: Math.min(totalPages, prevState.currentPage + 1) // Ensure page doesn't exceed total pages
     }));
-  };
+  }
 
   private handlePageClick = (page: number) => {
     this.setState({ currentPage: page });
-  };
+  }
 
   // Handle input changes for text and date fields
   private handleInputChange = (event: React.ChangeEvent<any>, field: string) => {
@@ -387,7 +382,7 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
         [field]: value
       }
     }));
-  };
+  }
 
   // Handle changes for category selection
   private handleCategoryChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -399,10 +394,10 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
         Category: selectedCategory || { Id: '', Title: '' }
       }
     }));
-  };
+  }
 
-    // Handle changes for category selection
-    private handleSiteChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  // Handle changes for category selection
+  private handleSiteChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
       const selectedSite = this.state.sites.filter(site => site.Id!.toString() === event.target.value);
       
       this.setState(prevState => ({
@@ -412,16 +407,15 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
           // Category: selectedCategory || { Id: '', Title: '' }
         }
       }));
-    };
-
+  }
 
   // Handle checkbox changes for recurrence and other boolean fields
   private handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>, field: string) => {
-    const value = event.target.checked;
+    const value: boolean = event.target.checked;
     const emptyCategory = this.props.categories.filter(category => category.Id === '');
 
     if(field === 'IsCategory'){
-      const dropdown = document.getElementById('Category') as HTMLSelectElement;
+      const dropdown: HTMLSelectElement = document.getElementById('Category') as HTMLSelectElement;
     if (dropdown) {
       // Clear the selected option
       dropdown.selectedIndex = 0; // Or use dropdown.value = '' to reset
@@ -436,7 +430,7 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
         }
       }));
     } else if(field === 'IsOtherCategory'){
-      const dropdown = document.getElementById('Category') as HTMLSelectElement;
+      const dropdown: HTMLSelectElement = document.getElementById('Category') as HTMLSelectElement;
       if (dropdown) {
         // Clear the selected option
         dropdown.selectedIndex = 0; // Or use dropdown.value = '' to reset
@@ -458,16 +452,16 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
         }
       }));
     }
-  };
+  }
 
    // Handle input changes for text and date fields
    private handleDateChange = (date: React.ChangeEvent<HTMLInputElement>, field: string) => {
-    const value = date.target.value;
+    const value: string = date.target.value;
     if(field === 'StartTime' || field === 'EndTime'){
 
-    const newStartTime = field === 'StartTime' ? value : this.state.newEvent.StartTime;
-    const newEndTime = field === 'EndTime' ? value : this.state.newEvent.EndTime;
-    const isTimeEarlier = newStartTime && newEndTime && newStartTime >= newEndTime;
+    const newStartTime: string = field === 'StartTime' ? value : this.state.newEvent.StartTime;
+    const newEndTime: string = field === 'EndTime' ? value : this.state.newEvent.EndTime;
+    const isTimeEarlier: boolean = newStartTime && newEndTime && newStartTime >= newEndTime;
 
       this.setState(prevState => ({
         newEvent: {
@@ -476,17 +470,17 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
         }, IsTimeEarlier:isTimeEarlier
       }));
     }
-  };
+  }
 
   private handleAddRemark = async (): Promise<void> => {
     try {
       
       const { newEvent} = this.state;
-      const calendarDateSelected = this.state.selectedDate;
+      const calendarDateSelected: Date = this.state.selectedDate;
       const startDate: Date = this.spHelpers.setDateWithSelectedTime(new Date(calendarDateSelected.toDateString()),newEvent.StartTime);
       const endDate: Date = this.spHelpers.setDateWithSelectedTime(new Date(calendarDateSelected.toDateString()),newEvent.EndTime);
       
-      let categoryValue = '';
+      let categoryValue: string = '';
       if (newEvent.IsCategory && newEvent.Category.length > 0) {
           categoryValue = newEvent.Category[0].Title || ''; // Use the selected category from dropdown
       } else if (newEvent.IsOtherCategory && newEvent.OtherCategory) {
@@ -514,7 +508,7 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
             Title: '',
             Location: '',
             Description: '',
-            Category: null,
+            Category: undefined,
             StartTime: '',
             EndTime: '',
             fAllDayEvent: false,
@@ -542,7 +536,7 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
   private getTotalPages = (): number => {
     const { eventsPerPage, selectedDate, events } = this.state;
      // Filter events based on the selected date before calculating pages
-    let filteredEvents = events;
+    let filteredEvents: IEvent[] = events;
       if (selectedDate) {
         filteredEvents = events.filter(event => 
           event.startDate.getDate() === selectedDate.getDate() &&
@@ -551,13 +545,13 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
         );
       }
   return Math.ceil(filteredEvents.length / eventsPerPage);
-  };
+  }
 
   private getCurrentPageEvents = (events: IEvent[]): IEvent[] => {
     const { currentPage, eventsPerPage , selectedDate} = this.state;
 
     // Filter events by the selected date (if any)
-  let filteredEvents = events;
+  let filteredEvents: IEvent[]= events;
   if (selectedDate) {
     if(events.length > 0){
       filteredEvents = events.filter(event => 
@@ -570,7 +564,7 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
  
   const startIndex = (currentPage - 1) * eventsPerPage;
     return filteredEvents.slice(startIndex, startIndex + eventsPerPage);
-  };
+  }
 
   // Toggle modal visibility
   private toggleModal = () => {
@@ -587,7 +581,7 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
                                          IsCompleted: false , 
                                           }
     }));
-  };
+  }
 
 // Event Completion Function, sets the field IsCompleted to true or false in SharePoint Events List.
   private EventCompletion = (event: IEvent) => {
@@ -624,10 +618,10 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
   }
 
   public render(): React.ReactElement<{}> {
-    const now = new Date();
-    const dayNumber = now.getDate();  // Get the current day of the month (1-31)
-    const time = this.state.currentTime;
-    const dayName = now.toLocaleString('default', { weekday: 'long' }).toUpperCase();  // Get the full name of the weekday (e.g., 'Friday')
+    const now: Date = new Date();
+    const dayNumber: number = now.getDate();  // Get the current day of the month (1-31)
+    const time: string = this.state.currentTime;
+    const dayName: string = now.toLocaleString('default', { weekday: 'long' }).toUpperCase();  // Get the full name of the weekday (e.g., 'Friday')
     
   return (
     <div className={styles.eventsCalendar}>
@@ -657,9 +651,7 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
           </span>
           <button className={styles.nextMonth} onClick={this.handleNextMonth}>❯</button>
         </div>
-        
         <this.CalendarDays />
-        
         <div className={styles.addEventContainer}>
           <input type='text' placeholder='00:00 Meeting' className={styles.addEventInput} />
           <button className={styles.addEventBtn}onClick={this.toggleModal} >+</button>
@@ -675,44 +667,43 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
       const query: string ='';
       let result: IEvent [] = [];
       this.spCrudOperation = new SPCrudOperations(this.props.context.spHttpClient, this.props.context.pageContext.web.absoluteUrl,'Events',query);
-      const reponse =  await this.spCrudOperation._getItems();
+      const reponse: any =  await this.spCrudOperation._getItems();
     
       if(reponse !== undefined && reponse.length > 0){
        reponse.map(item => {
           let temp: IEvent = {Id:0, Title:''};
-          temp.GUID = item['GUID'] !== undefined ? item['GUID']: undefined;
-          temp.Id = item['Id'] !== undefined ? item['Id'] : 0;
-          temp.Title = item['Title'] !== undefined ? item['Title'] : '';
-          temp.IsCompleted = item['IsCompleted'] !== undefined ? item['IsCompleted'] : undefined;
-          temp.Category =item['Category'] !== undefined ? item['Category'] : '';
-          temp.Location = item['Location'] !== undefined ? item['Location'] : '';
-          temp.Description = item['Description'] !== undefined ? item['Description'] : '';
-          temp.fAllDayEvent = item['fAllDayEvent'] !== undefined ? item['fAllDayEvent'] : undefined;
-          temp.fRecurrence = item['fRecurrence'] !== undefined ? item['fRecurrence'] : undefined;
-          if (item['EventDate'] !== undefined) {
-            temp.StartTime = this.spHelpers.convertGMTToLocalTime12Hour(item['EventDate']);
-            temp.startDate = new Date(item['EventDate']);
+          temp.GUID = item.GUID !== undefined ? item.GUID: undefined;
+          temp.Id = item.Id !== undefined ? item.Id : 0;
+          temp.Title = item.Title !== undefined ? item.Title : '';
+          temp.IsCompleted = item.IsCompleted !== undefined ? item.IsCompleted : undefined;
+          temp.Category =item.Category !== undefined ? item.Category : '';
+          temp.Location = item.Location !== undefined ? item.Location : '';
+          temp.Description = item.Description !== undefined ? item.Description : '';
+          temp.fAllDayEvent = item.fAllDayEvent !== undefined ? item.fAllDayEvent : undefined;
+          temp.fRecurrence = item.fRecurrence !== undefined ? item.fRecurrence : undefined;
+          if (item.EventDate !== undefined) {
+            temp.StartTime = this.spHelpers.convertGMTToLocalTime12Hour(item.EventDate);
+            temp.startDate = new Date(item.EventDate);
           } else {
             temp.StartTime = '';
             temp.startDate = new Date(2024, 10, 29); // Default fallback date
           }
 
-          if(item['EndDate'] !== undefined) {
-            temp.EndTime = this.spHelpers.convertGMTToLocalTime12Hour(item['EndDate']);
-            temp.endDate = new Date(item['EndDate']);
+          if(item.EndDate !== undefined) {
+            temp.EndTime = this.spHelpers.convertGMTToLocalTime12Hour(item.EndDate);
+            temp.endDate = new Date(item.EndDate);
           } else {
             temp.EndTime = '';
             temp.endDate = new Date(2024, 10, 29); // Default fallback date
           }
-
           result.push(temp);
         });
-        };
+        }
      return result;
     }
     catch (err) {
       console.log(err);
-    } 
+    }
   }
 
   private async GetSites(): Promise<ISite []> {
@@ -720,18 +711,20 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
       const query: string ='';
       let result: ISite [] = [];
       this.spCrudOperation = new SPCrudOperations(this.props.context.spHttpClient, this.props.context.pageContext.web.absoluteUrl,'Site',query);
-      const reponse =  await this.spCrudOperation._getItems();
+      const reponse: any =  await this.spCrudOperation._getItems();
     
       if(reponse !== undefined && reponse.length > 0){
        reponse.map(item => {
           const temp: ISite = {
-            Id : item['Id'] !== undefined ? item['Id'] : 0,
-            Title: item['Title'] !== undefined ? item['Title'] : '',
+            Id : item.Id !== undefined ? item.Id : 0,
+            Title: item.Title !== undefined ? item.Title : '',
+            MTSID: item.MTSID !== undefined ? item.MTSID : '',
+            PowerTechSiteName: item.PowerTechSiteName !== undefined ? item.PowerTechSiteName : undefined,
             SiteType:''
            }
           result.push(temp);
         });
-        };
+        }
      return result;
     }
     catch (err) {
@@ -744,13 +737,13 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
       const query: string ='';
       let result: ICommon [] = [];
       this.spCrudOperation = new SPCrudOperations(this.props.context.spHttpClient, this.props.context.pageContext.web.absoluteUrl,'SiteType',query);
-      const reponse =  await this.spCrudOperation._getItems();
+      const reponse: any =  await this.spCrudOperation._getItems();
     
       if(reponse !== undefined && reponse.length > 0){
        reponse.map(item => {
           const temp: ICommon = {
-            Id : item['Id'] !== undefined ? item['Id'] : 0,
-            Title: item['Title'] !== undefined ? item['Title'] : '',
+            Id : item.Id !== undefined ? item.Id : 0,
+            Title: item.Title !== undefined ? item.Title : '',
            }
           result.push(temp);
         });
@@ -761,5 +754,4 @@ export class CalenderEventsSe extends React.Component<ICalenderEventsSeProps,ICa
       console.log(err);
     } 
   }
-
 }

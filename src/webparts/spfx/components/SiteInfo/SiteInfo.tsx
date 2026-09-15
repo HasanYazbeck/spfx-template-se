@@ -35,17 +35,6 @@ export class SiteInfo extends React.Component<ISiteInfoProps, ISiteInfoState> {
       };
   }
 
-  private handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      let siteName: string = event.currentTarget.value;
-      siteName = siteName.replace(/'/g, "''");
-    if (siteName === '') {
-      this.setState({ selectedSite: undefined, searchResults: []});
-    //event.currentTarget : {value: event.currentTarget.value}
-    } else {
-      this.searchSite(siteName);
-    }
-  }
-
   // Handle Site selection
   private handleSiteSelect = (site: ISite) => {
     if (site.Id !== '0') {
@@ -182,7 +171,7 @@ export class SiteInfo extends React.Component<ISiteInfoProps, ISiteInfoState> {
                       onChange={(e) => this.handleRemarkChange(e) }
                     />
                   </div>
-                  {this.state.remarkEmpty && (<small className="text-danger">Add your Remark</small>)}
+                  {this.state.remarkEmpty && (<small className='text-danger'>'Add your Remark</small>)}
                 </div>
 
                 {/* Add remark fields */}
@@ -227,6 +216,18 @@ export class SiteInfo extends React.Component<ISiteInfoProps, ISiteInfoState> {
     );
   }
 
+  private handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    let siteName: string = event.currentTarget.value;
+    siteName = siteName.replace(/'/g, "''");
+
+    if (siteName === '') {
+        // Reset selectedSite when input is cleared
+        this.setState({ selectedSite: undefined, searchResults: [] });
+    } else {
+        this.searchSite(siteName);
+    }
+  }
+
   public render(): React.ReactElement<{}> {
         return (
             <div className='mt-1 position-relative'>
@@ -235,13 +236,18 @@ export class SiteInfo extends React.Component<ISiteInfoProps, ISiteInfoState> {
                         OnChange={this.handleSearchChange} 
                         onSelectItem={this.handleSiteSelect} 
                         searchResults={this.state.searchResults}
-                        placeholder='Site Name or Site ID'/>
+                        placeholder='Site | MTS ID'
+                        // value={this.state.selectedSite ? this.state.selectedSite.Title : ''}
+                        />
 
               {this.state.selectedSite !== undefined &&
                   <div className='card'>
-                    <div className={`card-header text-white text-center`} style={{backgroundColor: '#4d784e'}}>
-                        <h5>{this.state.selectedSite.Title.charAt(0).toUpperCase() 
-                        + this.state.selectedSite.Title.slice(1)} - {this.state.selectedSite.Id} </h5>
+                    <div className={`card-header text-white text-center text-capitalize`} style={{backgroundColor: '#6E8E59'}}>
+                      <div className='row d-flex justify-content-between align-items-center'>
+                        <div className={`h5 ${this.state.selectedSite.MTSID && 'col-auto'}`}>{`${this.state.selectedSite.Title}`} 
+                                    {this.state.selectedSite.PowerTechSiteName && ` | ${this.state.selectedSite.PowerTechSiteName}`}</div>
+                        <div className='h5 col-auto'> {this.state.selectedSite.MTSID && `MTS Id: ${this.state.selectedSite.MTSID}`}</div>
+                       </div>
                     </div>
                     <div className='card-body'>
                         <form>
@@ -295,7 +301,7 @@ export class SiteInfo extends React.Component<ISiteInfoProps, ISiteInfoState> {
                                 className='form-control'
                                 id='coordinates'
                                 placeholder={
-                                  this.state.selectedSite.Latitude !== null && this.state.selectedSite.Longtitude !== null ?
+                                  this.state.selectedSite.Latitude !== undefined && this.state.selectedSite.Longtitude !== undefined ?
                                   this.state.selectedSite.Latitude + ' , ' + this.state.selectedSite.Longtitude : ''} disabled/>
                               </div>
                             </div>
@@ -347,46 +353,18 @@ export class SiteInfo extends React.Component<ISiteInfoProps, ISiteInfoState> {
     const result: ISite [] = [];
     this.setState({ loading: true });
       try {
+        const isNumber = !isNaN(parseInt(siteName));
+        let matchingSites = [];
         // const query: string = `?$filter=substringof('${siteName}',Title) or ID eq '${siteName}'` +
         // `&$select=Id,Title,Latitude,Logtitude,PowerSourceNumber,IsSecure,Priority,NearestArmyCenter,NearestArmyCenterNumber,Remarks,`+
         // `Kaza/Id,Kaza/Title,SiteType/Id,SiteType/Title,PowerSource/Id,PowerSource/Title`+
         // `&$expand=Kaza,PowerSource,SiteType`;
-        // this.spCrudOperations = new SPCrudOperations(this.props.context.spHttpClient,
-        //                         this.props.context.pageContext.web.absoluteUrl, 'Site', query);
-        // this.spCrudOperations._getItemsWithQuery()
-        // .then((data) => {
-        //   data.map((obj) => {
-        //     let siteType: string = '';
-        //     obj.SiteType.map((item: any) => {
-        //       siteType = siteType === '' ? item.Title.charAt(0).toUpperCase() + item.Title.slice(1) : siteType + '-' + item.Title.charAt(0).toUpperCase() + item.Title.slice(1);
-        //     });
-        //     const temp: ISite = {
-        //       Id: obj['ID'] !== undefined && obj['ID'] !== null ? obj['ID'] : '',
-        //       Title: obj['Title'] !== undefined && obj['Title'] !== null ? obj['Title'].charAt(0).toUpperCase() + obj['Title'].slice(1) : '',
-        //       SiteType: siteType,
-        //       Latitude: obj['Latitude'] !== undefined && obj['Latitude'] !== null ? obj['Latitude'] : '',
-        //       Longtitude : obj['Logtitude'] !== undefined && obj['Logtitude'] !== null ? obj['Logtitude'] : '',
-        //       Priority: obj['Priority'] !== undefined && obj['Priority'] !== null ? obj['Priority'] : 0,
-        //       Remarks: obj['Remarks'] !== undefined && obj['Remarks'] !== null ? obj['Remarks'] : '',
-        //       NearestArmyCenter: obj['NearestArmyCenter'] !== undefined && obj['NearestArmyCenter'] !== null ? obj['NearestArmyCenter'] : '',
-        //       NearestArmyCenterNumber: obj['NearestArmyCenterNumber'] !== undefined && obj['NearestArmyCenterNumber'] !== null ? obj['NearestArmyCenterNumber'] : '',
-        //       PowerSourceNumber: obj['PowerSourceNumber'] !== undefined && obj['PowerSourceNumber'] !== null ? obj['PowerSourceNumber'] : '',      
-        //       IsSecure: obj['IsSecure'] !== undefined && obj['IsSecure'] !== null ? obj['IsSecure'] : '',
-        //       Kaza: obj.Kaza !== undefined && obj.Kaza !== null ? obj.Kaza.Title : '',
-        //       PowerSource: obj.PowerSource !== undefined && obj.PowerSource !== null ? obj.PowerSource.Title : ''
-        //     };
-        //     result.push(temp);
-        //   });
-        //   this.setState({ searchResults : result });
-        //   // console.log('Item retreived successfully!', data);
-        // })
-        // .catch(error => {
-        //   console.error('An error has occurred while retrieving items!', error);
-        // });
-        const matchingSites = this.props.sites.filter(site => 
-          site.Title.toLowerCase().indexOf(siteName.toLowerCase()) >= 0 || 
-          site.Id.toString().indexOf(siteName.toLowerCase()) >= 0
-        );
+        if(isNumber){
+          matchingSites = this.props.sites.filter(site => (site.MTSID && site.MTSID.toString() === siteName.toString()));
+        } else {
+          matchingSites = this.props.sites.filter(site => site.Title.toLowerCase().indexOf(siteName.toLowerCase()) >= 0);
+        }
+       
         if (matchingSites.length > 0) {
           this.setState({ searchResults: matchingSites, loading: false });
         } else {
@@ -402,6 +380,7 @@ export class SiteInfo extends React.Component<ISiteInfoProps, ISiteInfoState> {
       this.spCrudOperations = new SPCrudOperations(this.props.context.spHttpClient,this.props.context.pageContext.web.absoluteUrl, 'Remarks', '');
       await this.spCrudOperations._insertItem(remark);
     } catch (error) {
+      // tslint:disable-next-line:no-string-literal
     console.error('An error has occurred!', error);
     }
   }
@@ -422,15 +401,15 @@ export class SiteInfo extends React.Component<ISiteInfoProps, ISiteInfoState> {
       .then((data) => {
         data.map((obj) => {
           const temp: Remark = {
-            Id: obj['id'] !== undefined && obj['id'] !== null ? obj['id'] : '',
-            Title: obj['Title'] !== undefined && obj['Title'] !== null ? obj['Title'].charAt(0).toUpperCase() + obj['Title'].slice(1) : '',
-            ItemId:  obj['ItemId'] !== undefined && obj['ItemId'] !== null ? obj['ItemId'] : '',
-            Description:  obj['Description'] !== undefined && obj['Description'] !== null ? obj['Description'] : '',
-            ListName: obj['ListName'] !== undefined && obj['ListName'] !== null ? obj['ListName'] : '',
+            Id: obj.id !== undefined && obj.id !== null ? obj.id : '',
+            Title: obj.Title !== undefined && obj.Title !== null ? obj.Title.charAt(0).toUpperCase() + obj.Title.slice(1) : '',
+            ItemId:  obj.ItemId !== undefined && obj.ItemId !== null ? obj.ItemId : '',
+            Description:  obj.Description !== undefined && obj.Description !== null ? obj.Description : '',
+            ListName: obj.ListName !== undefined && obj.ListName !== null ? obj.ListName : '',
             AddedBy:  obj.Author !== undefined && obj.Author !== null ? obj.Author.Title : '',
             ModifiedBy: obj.Editor !== undefined && obj.Editor !== null ? obj.Editor.Title : '',
-            DateAdded: obj['Created'] !== undefined && obj['Created'] !== null ? obj['Created'] : '',
-            DateModified : obj['Modified'] !== undefined && obj['Modified'] !== null ? obj['Modified'] : '',
+            DateAdded: obj.Created!== undefined && obj.Created!== null ? obj.Created: '',
+            DateModified : obj.Modified !== undefined && obj.Modified !== null ? obj.Modified : '',
           };
           result.push(temp);
         });
@@ -438,9 +417,11 @@ export class SiteInfo extends React.Component<ISiteInfoProps, ISiteInfoState> {
         this.setState({ siteRemarksList : paginatedRemarks , totalRemarks: result.length});
       })
       .catch(error => {
+        // tslint:disable-next-line:no-string-literal
         console.error('An error has occurred while retrieving items!', error);
       });
     } catch (error) {
+      // tslint:disable-next-line:no-string-literal
     console.error('An error has occurred!', error);
     }
   }
